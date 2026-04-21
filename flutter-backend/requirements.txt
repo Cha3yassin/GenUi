@@ -1,0 +1,52 @@
+# ============================================================
+# Fberaucracy Backend — Python Dependencies
+# ============================================================
+
+# Web Framework
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+
+# Data Validation
+pydantic==2.9.2
+pydantic-settings==2.6.1
+
+# Database — Async SQLAlchemy + PostgreSQL
+sqlalchemy==2.0.36
+asyncpg==0.30.0
+alembic==1.14.0
+
+# Vector Database
+chromadb==0.5.23
+
+# Google AI — Gemini + Embeddings
+google-generativeai==0.8.3
+
+# Firebase Admin — Token Verification
+firebase-admin==6.6.0
+
+# HTTP Client
+httpx==0.28.0
+
+# Utilities
+python-dotenv==1.0.1
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.17
+
+# Logging
+structlog==24.4.0
+
+# Async task support
+anyio==4.7.0
+
+# Tokenization for chunking
+tiktoken==0.8.0
+
+# Date utilities
+python-dateutil==2.9.0.post0
+
+# Testing (required for test suite)
+pytest==8.3.3
+pytest-asyncio==0.24.0
+httpx==0.28.0
+aiosqlite==0.20.0          # Async SQLite driver for in-memory test DB

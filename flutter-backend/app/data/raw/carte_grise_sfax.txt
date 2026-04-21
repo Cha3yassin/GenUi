@@ -1,0 +1,107 @@
+PROCEDURE: Carte Grise (Certificat d'Immatriculation) — Renouvellement et Transfert — Sfax, Tunisie
+SOURCE: Agence Technique des Transports Terrestres (ATTT) — Direction Régionale de Sfax
+CATEGORY: vehicles
+LAST_VERIFIED: 2024-01-15
+REGION: Sfax
+
+---
+
+DESCRIPTION GÉNÉRALE:
+La carte grise (certificat d'immatriculation) est le document officiel d'identité d'un véhicule en Tunisie. Elle est obligatoire pour circuler légalement. Le transfert de propriété (mutation) est requis lors de l'achat d'un véhicule d'occasion.
+
+---
+
+CAS 1: TRANSFERT DE PROPRIÉTÉ (Achat véhicule d'occasion)
+
+DOCUMENTS REQUIS POUR L'ACHETEUR:
+1. CIN valide de l'acheteur (originale + 2 photocopies)
+2. Acte de vente légalisé (rédigé par un notaire ou légalisé à la municipalité)
+3. Carte grise originale de l'ancien propriétaire
+4. Certificat de visite technique valide (Contrôle technique ATTT — validité: 1 an)
+5. Attestation d'assurance valide (au nom du nouveau propriétaire)
+6. Quittance de paiement de la vignette automobile (si applicable)
+7. Formulaire de demande de mutation (disponible à l'ATTT ou en ligne)
+
+DOCUMENTS REQUIS POUR L'VENDEUR:
+1. CIN valide du vendeur
+2. Acte de vente en double exemplaire
+
+---
+
+ÉTAPES — TRANSFERT DE PROPRIÉTÉ:
+
+Étape 1 — Légaliser l'acte de vente
+Se rendre à la Municipalité de Sfax ou chez un notaire
+Coût légalisation: 5.000 TND (notaire) ou 1.000 TND (municipalité)
+
+Étape 2 — Passer le contrôle technique
+Centre de contrôle technique ATTT de Sfax
+Adresse: Route de Tunis, km 3, Sfax
+Coût contrôle: 45.000 TND
+Durée: 1 heure environ
+
+Étape 3 — Souscrire une assurance
+Contacter une compagnie d'assurance agréée
+Assurance responsabilité civile minimale obligatoire
+Coût minimum assurance: à partir de 80.000 TND/an
+
+Étape 4 — Déposer le dossier à l'ATTT
+Adresse ATTT Sfax: Route de Tunis, Cité Industrielle, Sfax 3000
+Horaires: Lundi-Vendredi 8h00-16h30
+Remettre le dossier complet au guichet "Mutations"
+
+Étape 5 — Payer les droits de mutation et de timbre
+Droits de mutation: calculés selon la puissance fiscale du véhicule
+Véhicule ≤4 CV: 30.000 TND
+Véhicule 5-7 CV: 50.000 TND
+Véhicule 8-10 CV: 80.000 TND
+Véhicule >10 CV: 100.000 TND
+Timbre fiscal: 3.000 TND
+Vignette annuelle: selon l'âge et la puissance du véhicule
+
+Étape 6 — Retirer la nouvelle carte grise
+Délai: 5 à 10 jours ouvrables
+Un accusé de dépôt est remis immédiatement (valable comme document de circulation temporaire)
+
+---
+
+CAS 2: RENOUVELLEMENT CARTE GRISE (perte ou détérioration)
+
+DOCUMENTS REQUIS:
+1. CIN valide
+2. Déclaration de perte (si perte) — faite au poste de police
+3. Rapport de police (si vol)
+4. Ancienne carte grise (si détérioration)
+5. Certificat de visite technique valide
+6. Formulaire de demande
+
+Coût renouvellement: 15.000 TND + timbre 3.000 TND
+Délai: 3 à 5 jours ouvrables
+
+---
+
+COÛTS TOTAUX ESTIMÉS (Transfert de propriété):
+Légalisation acte: 1.000 à 5.000 TND
+Contrôle technique: 45.000 TND
+Droits de mutation: 30.000 à 100.000 TND
+Timbre fiscal: 3.000 TND
+Assurance (minimum): 80.000 TND/an
+Total minimum estimé: 159.000 TND
+
+---
+
+BUREAU RESPONSABLE:
+Nom: ATTT — Agence Technique des Transports Terrestres, Direction Régionale de Sfax
+Adresse: Route de Tunis, Cité Industrielle, Sfax 3000, Tunisie
+Téléphone: +216 74 241 000
+Site web: www.attt.tn
+Horaires: Lundi-Vendredi 8h00-16h30
+
+---
+
+AVERTISSEMENTS:
+- Circuler sans carte grise est passible d'une amende de 100 TND et d'immobilisation du véhicule
+- Le délai de mutation légal est 30 jours après la signature de l'acte de vente
+- La visite technique doit être passée avant le dépôt du dossier
+- Les véhicules de plus de 5 ans doivent passer une visite technique semestrielle
+- En cas de véhicule importé, des documents douaniers supplémentaires sont requis

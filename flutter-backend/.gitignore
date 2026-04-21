@@ -1,0 +1,13 @@
+chroma_data/
+__pycache__/
+*.pyc
+*.pyo
+.env
+*.log
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+firebase_service_account.json
+logs/

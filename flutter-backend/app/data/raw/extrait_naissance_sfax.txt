@@ -1,0 +1,73 @@
+PROCEDURE: Demande d'extrait de naissance — Sfax, Tunisie
+SOURCE: Municipalité de Sfax — Service de l'État Civil
+CATEGORY: civil_status
+LAST_VERIFIED: 2024-01-15
+REGION: Sfax
+
+---
+
+DESCRIPTION GÉNÉRALE:
+L'extrait de naissance est un document officiel qui atteste l'existence légale d'une personne physique. Il est obligatoire pour de nombreuses démarches administratives en Tunisie : inscription scolaire, mariage, obtention du passeport, CIN, etc.
+
+---
+
+DOCUMENTS REQUIS:
+1. Carte d'Identité Nationale (CIN) valide du demandeur ou du représentant légal
+2. Livret de famille (pour les mineurs)
+3. Procuration légalisée si demande effectuée par un tiers
+4. Formulaire de demande (disponible sur place)
+
+---
+
+ÉTAPES DE LA PROCÉDURE:
+Étape 1 — Se rendre à la Municipalité de Sfax
+Adresse: Avenue Habib Bourguiba, Sfax 3000
+Horaires: Lundi au Vendredi, 8h00 — 16h00 (pause: 12h00 — 13h00)
+Service: Guichet de l'État Civil (Rez-de-chaussée, Guichet N°3)
+
+Étape 2 — Présenter les documents requis
+Remettre la CIN (originale + photocopie) à l'agent
+Préciser la relation avec le titulaire de l'acte (soi-même, enfant, parent)
+
+Étape 3 — Payer les frais de timbre fiscal
+Montant: 0.600 TND par extrait (timbre fiscal)
+Paiement: Sur place, à la caisse municipale (Guichet N°1)
+
+Étape 4 — Recevoir l'extrait
+Le document est délivré immédiatement (même jour)
+Nombre de copies: Jusqu'à 3 copies par demande
+
+---
+
+DÉLAI DE TRAITEMENT:
+Immédiat — remis le jour même (dans l'heure)
+Aucun dossier à déposer, traitement sur place.
+
+---
+
+COÛTS:
+Timbre fiscal: 0.600 TND par copie
+Frais de légalisation (si nécessaire): 1.000 TND
+Total minimum: 0.600 TND
+
+---
+
+BUREAU RESPONSABLE:
+Nom: Service de l'État Civil — Municipalité de Sfax
+Adresse: Avenue Habib Bourguiba, Sfax 3000, Tunisie
+Téléphone: +216 74 228 500
+Horaires: Lundi-Vendredi 8h00-16h00, Samedi 8h00-12h00
+
+---
+
+AVERTISSEMENTS ET NOTES:
+- L'extrait de naissance est valable 3 mois pour les procédures nécessitant un document récent
+- Les personnes nées hors de Sfax doivent s'adresser à leur municipalité d'origine
+- Pour une légalisation pour usage à l'étranger, une apostille est requise via le Ministère des Affaires Étrangères
+- Service disponible aussi auprès du consulat tunisien pour les Tunisiens résidant à l'étranger
+
+---
+
+PROCÉDURE EN LIGNE (partiellement):
+Un service en ligne est disponible sur le portail e-Gov de Tunisie: www.tunisia.gov.tn
+La demande en ligne génère un numéro de référence, le retrait physique reste obligatoire.
