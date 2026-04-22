@@ -5,6 +5,7 @@ Responsibilities:
 - Build strict structured prompts for Gemini 1.5 Flash
 - Call Gemini asynchronously with retry logic
 - Return the raw text response for downstream validation
+- Support both RAG-grounded and general-knowledge modes
 """
 
 import asyncio
@@ -32,9 +33,9 @@ def _get_model() -> genai.GenerativeModel:
         _model = genai.GenerativeModel(
             model_name=settings.GEMINI_MODEL,
             generation_config=genai.GenerationConfig(
-                temperature=0.0,        # Zero temperature — deterministic, factual
-                top_p=1.0,
-                top_k=1,
+                temperature=0.1,        # Very low – factual but not fully deterministic
+                top_p=0.95,
+                top_k=40,
                 max_output_tokens=4096,
                 response_mime_type="application/json",  # Force JSON output
             ),
@@ -65,11 +66,12 @@ _JSON_SCHEMA = """{
   "office": {
     "name": "...",
     "address": "...",
-    "hours": "..."
+    "hours": "...",
+    "phone": null
   },
   "warnings": ["..."],
   "source": "...",
-  "last_verified": "..."
+  "last_verified": null
 }"""
 
 
@@ -81,11 +83,10 @@ def build_prompt(
     """
     Construct the full Gemini prompt.
 
-    Design principles:
-    - Context is injected first so Gemini stays grounded.
-    - Strict rules prevent hallucination.
-    - Language instruction ensures the response matches user preference.
-    - Exact JSON schema is provided so Gemini knows the output shape.
+    Supports two modes:
+    - Grounded mode: context chunks from ChromaDB are available
+    - General knowledge mode: no chunks, Gemini uses its own knowledge
+      about Tunisian government procedures
 
     Args:
         user_message: The original user question.
@@ -95,38 +96,66 @@ def build_prompt(
     Returns:
         A formatted prompt string ready for Gemini.
     """
-    # Format retrieved context chunks
-    context_parts = []
-    for i, chunk in enumerate(context_chunks, start=1):
-        source = chunk.get("metadata", {}).get("source_id", "unknown")
-        context_parts.append(
-            f"--- Context Chunk {i} (source: {source}) ---\n{chunk['text']}\n"
-        )
-    context_block = "\n".join(context_parts) if context_parts else "No relevant context found."
-
     language_names = {"ar": "Arabic", "fr": "French", "en": "English"}
     language_name = language_names.get(language, "French")
 
-    prompt = f"""You are a structured data formatter for the Fberaucracy app — a Tunisian government procedures guide.
+    has_context = len(context_chunks) > 0
 
-STRICT RULES — FOLLOW EXACTLY:
-1. Return ONLY valid JSON. No markdown, no code fences, no explanations.
-2. Do NOT invent, hallucinate, or guess any information.
-3. Use ONLY the information provided in the CONTEXT CHUNKS below.
-4. Preserve exact fees, document names, and office names from the context.
-5. If the context does not contain enough information for a field, use null or an empty array.
-6. All text values in "title" must be in Arabic, French, AND English simultaneously.
-7. All other text fields (steps, documents, warnings) should be in the user's preferred language: {language_name}.
-8. The "type" field MUST always be "procedure_guide".
-9. Do not output generic placeholders such as "information not available", "N/A", or "unknown".
-10. If context supports it, produce at least 3 concrete procedural steps with actionable descriptions.
-11. "source" must be set from the context chunk metadata, and "last_verified" should only be set if present in context.
+    if has_context:
+        # ── Grounded mode: use only RAG context ──────────────────────────────
+        context_parts = []
+        for i, chunk in enumerate(context_chunks, start=1):
+            source = chunk.get("metadata", {}).get("source_id", "unknown")
+            context_parts.append(
+                f"--- Context Chunk {i} (source: {source}) ---\n{chunk['text']}\n"
+            )
+        context_block = "\n".join(context_parts)
+
+        prompt = f"""You are a precise structured data formatter for Sahil — a Tunisian government procedures guide app.
+
+STRICT RULES:
+1. Return ONLY valid JSON. No markdown fences, no explanations, no comments.
+2. Use ONLY the information in the CONTEXT CHUNKS below. Do NOT invent data.
+3. Preserve exact fees, document names, and office names from the context.
+4. If a field lacks context, use null or an empty array — never make up values.
+5. The "title" field MUST have "ar", "fr", AND "en" translations simultaneously.
+6. All other text fields (steps, documents, warnings) use language: {language_name}.
+7. The "type" field MUST always be "procedure_guide".
+8. Provide at least 3 concrete, actionable procedural steps when context allows.
+9. Set "source" from context metadata; set "last_verified" only if present in context.
+10. The "costs.total" and "costs.breakdown[].amount" MUST be numbers (floats), not strings.
 
 USER QUESTION:
 {user_message}
 
-CONTEXT CHUNKS (authoritative source — use only this):
+CONTEXT CHUNKS (authoritative — use only these):
 {context_block}
+
+OUTPUT SCHEMA:
+{_JSON_SCHEMA}
+
+Return ONLY the JSON object:"""
+
+    else:
+        # ── General knowledge mode: Gemini knows Tunisian procedures ─────────
+        prompt = f"""You are Sahil, an expert assistant on Tunisian government (administration) procedures.
+You will answer a question about official Tunisian administrative procedures based on your training knowledge.
+
+CRITICAL RULES:
+1. Return ONLY valid JSON matching the schema below. No markdown, no code fences.
+2. Provide accurate, helpful information about Tunisian administrative procedures.
+3. You MAY use your general knowledge about Tunisian bureaucracy (ATTT, CNSS, RNE, Ministries, etc.).
+4. Be honest: if something varies by region or situation, mention it in "warnings".
+5. The "title" field MUST have "ar", "fr", AND "en" translations simultaneously.
+6. All other text fields (steps, documents, warnings) use language: {language_name}.
+7. The "type" field MUST always be "procedure_guide".
+8. Give at least 3 clear, actionable steps with real office names (ATTT, RNE, CNSS, etc.).
+9. Estimate fees in TND when known; use 0 and note uncertainty in warnings if unknown.
+10. The "costs.total" and "costs.breakdown[].amount" MUST be numbers (floats), not strings.
+11. Set "source" to "Sahil AI Knowledge Base" and "last_verified" to null.
+
+USER QUESTION:
+{user_message}
 
 OUTPUT SCHEMA (return JSON matching this exact shape):
 {_JSON_SCHEMA}
@@ -142,16 +171,17 @@ async def generate_procedure_response(
     user_message: str,
     context_chunks: List[dict],
     language: str = "fr",
-    max_retries: int = 2,
+    max_retries: int = 3,
 ) -> str:
     """
     Call Gemini with the constructed prompt and return the raw text response.
 
     Implements exponential back-off retry for transient API failures.
+    Works in both grounded (RAG) and general-knowledge modes.
 
     Args:
         user_message: Original user question.
-        context_chunks: Retrieved RAG context.
+        context_chunks: Retrieved RAG context (may be empty list).
         language: Preferred response language.
         max_retries: Number of retry attempts on transient errors.
 
@@ -163,6 +193,15 @@ async def generate_procedure_response(
     """
     model = _get_model()
     prompt = build_prompt(user_message, context_chunks, language)
+    mode = "grounded" if context_chunks else "general-knowledge"
+
+    logger.info(
+        "Calling Gemini",
+        mode=mode,
+        context_chunks=len(context_chunks),
+        language=language,
+        query_preview=user_message[:80],
+    )
 
     last_error: Optional[Exception] = None
 
@@ -180,13 +219,14 @@ async def generate_procedure_response(
             logger.debug(
                 "Gemini response received",
                 attempt=attempt,
+                mode=mode,
                 response_length=len(raw_text),
             )
             return raw_text
 
         except Exception as exc:
             last_error = exc
-            wait_time = 2 ** attempt  # 1s, 2s, 4s ...
+            wait_time = 2 ** attempt  # 1s, 2s, 4s, 8s ...
             logger.warning(
                 "Gemini API error — retrying",
                 attempt=attempt,

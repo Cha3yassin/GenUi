@@ -22,7 +22,7 @@ class InfoCardBlockWidget extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Theme.of(
                   context,
-                ).colorScheme.primary.withValues(alpha: 0.12),
+                ).colorScheme.primary.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(

@@ -51,7 +51,7 @@ class _ProcedureHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final percent = (procedure.progress * 100).round();
+    final percent = procedure.totalSteps > 0 ? (procedure.progress * 100).round() : 100;
 
     return Card(
       child: Padding(
@@ -108,7 +108,7 @@ class _ProcedureHero extends StatelessWidget {
                           minHeight: 9,
                           backgroundColor: Theme.of(
                             context,
-                          ).colorScheme.primary.withValues(alpha: 0.12),
+                          ).colorScheme.primary.withOpacity(0.12),
                         ),
                       ),
                     ],
@@ -123,7 +123,7 @@ class _ProcedureHero extends StatelessWidget {
                     strokeWidth: 6,
                     backgroundColor: Theme.of(
                       context,
-                    ).colorScheme.primary.withValues(alpha: 0.12),
+                    ).colorScheme.primary.withOpacity(0.12),
                   ),
                 ),
               ],
@@ -146,7 +146,7 @@ class _SummaryPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+        color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
         borderRadius: BorderRadius.circular(99),
       ),
       child: Row(

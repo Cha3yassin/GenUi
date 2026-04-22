@@ -168,7 +168,7 @@ class _TrustCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Theme.of(
                   context,
-                ).colorScheme.secondary.withValues(alpha: 0.12),
+                ).colorScheme.secondary.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(

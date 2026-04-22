@@ -28,13 +28,20 @@ def create_engine() -> AsyncEngine:
     Build an async engine with sensible connection pool defaults.
     pool_pre_ping=True re-validates stale connections before use.
     """
+    kwargs = {
+        "echo": settings.DEBUG,
+        "pool_recycle": 3600,
+    }
+    if "sqlite" in settings.DATABASE_URL:
+        kwargs["connect_args"] = {"check_same_thread": False}
+    else:
+        kwargs["pool_pre_ping"] = True
+        kwargs["pool_size"] = 10
+        kwargs["max_overflow"] = 20
+        
     return create_async_engine(
         settings.DATABASE_URL,
-        echo=settings.DEBUG,          # Log SQL statements in debug mode
-        pool_pre_ping=True,
-        pool_size=10,
-        max_overflow=20,
-        pool_recycle=3600,            # Recycle connections every hour
+        **kwargs
     )
 
 

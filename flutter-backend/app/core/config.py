@@ -43,15 +43,12 @@ class Settings(BaseSettings):
     @property
     def DATABASE_URL(self) -> str:
         """Build async PostgreSQL DSN from individual components."""
-        return (
-            f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
-            f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
-        )
+        return "sqlite+aiosqlite:///./fberaucracy.db"
 
     # ── Google AI ─────────────────────────────────────────────────────────────
     GOOGLE_API_KEY: str = Field(default="")
-    GEMINI_MODEL: str = Field(default="gemini-1.5-flash")
-    EMBEDDING_MODEL: str = Field(default="models/text-embedding-004")
+    GEMINI_MODEL: str = Field(default="gemini-2.5-flash")
+    EMBEDDING_MODEL: str = Field(default="models/gemini-embedding-2-preview")
 
     # ── Firebase ──────────────────────────────────────────────────────────────
     FIREBASE_SERVICE_ACCOUNT_PATH: Optional[str] = Field(default=None)

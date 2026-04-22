@@ -12,16 +12,33 @@ class AsyncValueWidget<T> extends StatelessWidget {
     return value.when(
       data: data,
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stackTrace) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(
-            'Une erreur est survenue. Veuillez réessayer.',
-            style: Theme.of(context).textTheme.bodyLarge,
-            textAlign: TextAlign.center,
+      error: (error, stackTrace) {
+        // Skip showing debounce cancellation errors
+        if (error.toString().contains('Search cancelled')) {
+          return const SizedBox.shrink();
+        }
+        
+        // Clean up error message
+        final message = error.toString().replaceFirst('Exception: ', '').replaceFirst('ApiException: ', '');
+        
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.warning_amber_rounded, size: 56, color: Colors.orangeAccent),
+                const SizedBox(height: 16),
+                Text(
+                  message.isNotEmpty ? message : 'Une erreur est survenue. L\'IA est peut-être surchargée.',
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

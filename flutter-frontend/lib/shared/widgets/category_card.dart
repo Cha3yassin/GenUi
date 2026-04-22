@@ -23,7 +23,7 @@ class CategoryCard extends StatelessWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: category.accentColor.withValues(alpha: 0.12),
+                  color: category.accentColor.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Icon(category.icon, color: category.accentColor),

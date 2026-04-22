@@ -48,7 +48,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               SahilSearchBar(
                 controller: _controller,
                 hintText: 'Try: buy a used car, carte grise, passeport',
-                onChanged: (value) {
+                onSubmitted: (value) {
                   ref.read(searchQueryProvider.notifier).setQuery(value);
                 },
               ),

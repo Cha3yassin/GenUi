@@ -29,7 +29,7 @@ class OfficeCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Theme.of(
                       context,
-                    ).colorScheme.primary.withValues(alpha: 0.11),
+                    ).colorScheme.primary.withOpacity(0.11),
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: Icon(

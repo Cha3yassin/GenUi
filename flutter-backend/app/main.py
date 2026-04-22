@@ -56,20 +56,26 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         if settings.is_production:
             raise
 
-    await init_db()
+    try:
+        await init_db()
 
-    # Seed categories on first run
-    from app.db.session import AsyncSessionLocal
-    from app.services.procedure_service import seed_categories
-    async with AsyncSessionLocal() as session:
-        try:
-            inserted = await seed_categories(session)
-            await session.commit()
-            if inserted > 0:
-                logger.info("Categories seeded", count=inserted)
-        except Exception as exc:
-            await session.rollback()
-            logger.error("Category seeding failed", error=str(exc))
+        # Seed categories on first run
+        from app.db.session import AsyncSessionLocal
+        from app.services.procedure_service import seed_categories
+        async with AsyncSessionLocal() as session:
+            try:
+                inserted = await seed_categories(session)
+                await session.commit()
+                if inserted > 0:
+                    logger.info("Categories seeded", count=inserted)
+            except Exception as exc:
+                await session.rollback()
+                logger.error("Category seeding failed", error=str(exc))
+    except Exception as exc:
+        logger.warning(
+            "⚠️ PostgreSQL is not available locally. Application will run in degraded mode (GenUI is still fully functional).",
+            error=str(exc)
+        )
 
     logger.info("Startup complete — accepting requests")
 
@@ -103,10 +109,10 @@ def create_app() -> FastAPI:
     # ── CORS ───────────────────────────────────────────────────────────────────
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.cors_origins,
+        allow_origins=["*"],
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allow_headers=["Authorization", "Content-Type", "Accept"],
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
 
     # ── Global Exception Handlers ──────────────────────────────────────────────

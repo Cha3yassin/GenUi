@@ -22,7 +22,7 @@ class OfficeMapPlaceholderBlockWidget extends StatelessWidget {
               painter: _MapGridPainter(
                 color: Theme.of(
                   context,
-                ).colorScheme.primary.withValues(alpha: 0.08),
+                ).colorScheme.primary.withOpacity(0.08),
               ),
             ),
           ),

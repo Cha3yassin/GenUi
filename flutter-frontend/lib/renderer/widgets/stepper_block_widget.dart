@@ -64,7 +64,7 @@ class _StepRow extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: step.isCompleted
                       ? colorScheme.primary
-                      : activeColor.withValues(alpha: 0.12),
+                      : activeColor.withOpacity(0.12),
                   shape: BoxShape.circle,
                   border: Border.all(color: activeColor, width: 1.5),
                 ),
@@ -88,7 +88,7 @@ class _StepRow extends StatelessWidget {
                   child: Container(
                     width: 2,
                     margin: const EdgeInsets.symmetric(vertical: 6),
-                    color: activeColor.withValues(alpha: 0.24),
+                    color: activeColor.withOpacity(0.24),
                   ),
                 ),
             ],
@@ -115,7 +115,7 @@ class _StepRow extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: colorScheme.primary.withValues(alpha: 0.1),
+                            color: colorScheme.primary.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(99),
                           ),
                           child: Text(

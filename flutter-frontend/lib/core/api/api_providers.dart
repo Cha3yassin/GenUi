@@ -5,9 +5,10 @@ import '../../shared/models/office_model.dart';
 import '../../shared/models/procedure_model.dart';
 import '../../shared/models/procedure_summary_model.dart';
 import 'api_service.dart';
-import 'mock_api_service.dart';
+import 'http_api_service.dart';
 
-final apiServiceProvider = Provider<ApiService>((ref) => MockApiService());
+/// Provide the REAL API service instead of the Mock
+final apiServiceProvider = Provider<ApiService>((ref) => HttpApiService());
 
 final categoriesProvider = FutureProvider<List<CategoryModel>>((ref) {
   return ref.watch(apiServiceProvider).getCategories();
@@ -47,9 +48,28 @@ class SearchQueryNotifier extends Notifier<String> {
   }
 }
 
+/// Debounced search results provider
 final searchResultsProvider = FutureProvider<List<ProcedureSummaryModel>>((
   ref,
-) {
+) async {
   final query = ref.watch(searchQueryProvider);
+  
+  if (query.trim().length < 2) {
+    return [];
+  }
+
+  // Debounce: Cancel the request if the user types another letter within 400ms
+  var isCancelled = false;
+  ref.onDispose(() {
+    isCancelled = true;
+  });
+
+  await Future<void>.delayed(const Duration(milliseconds: 400));
+  
+  if (isCancelled) {
+    throw Exception('Search cancelled due to debounce');
+  }
+
   return ref.watch(apiServiceProvider).searchProcedures(query);
 });
+

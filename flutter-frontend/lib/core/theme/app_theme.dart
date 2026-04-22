@@ -41,7 +41,7 @@ class AppTheme {
         backgroundColor: sand,
         foregroundColor: ink,
       ),
-      cardTheme: CardThemeData(
+      cardTheme: CardTheme(
         color: paper,
         elevation: 0,
         margin: EdgeInsets.zero,
