@@ -10,9 +10,8 @@ class OfficeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = office.isOpen
-        ? const Color(0xFF3F7D4F)
-        : const Color(0xFF9A4B3F);
+    final statusColor =
+        office.isOpen ? const Color(0xFF3F7D4F) : const Color(0xFF9A4B3F);
 
     return Card(
       child: Padding(
@@ -69,6 +68,14 @@ class OfficeCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             _OfficeMeta(icon: Icons.place_rounded, label: office.address),
+            if (office.lat != null && office.lng != null) ...[
+              const SizedBox(height: 8),
+              _OfficeMeta(
+                icon: Icons.map_rounded,
+                label:
+                    '${office.lat!.toStringAsFixed(4)}, ${office.lng!.toStringAsFixed(4)}',
+              ),
+            ],
           ],
         ),
       ),

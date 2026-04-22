@@ -7,6 +7,8 @@ class OfficeModel {
     required this.workingHours,
     required this.isOpen,
     required this.address,
+    this.lat,
+    this.lng,
   });
 
   final String id;
@@ -16,6 +18,8 @@ class OfficeModel {
   final String workingHours;
   final bool isOpen;
   final String address;
+  final double? lat;
+  final double? lng;
 
   factory OfficeModel.fromJson(Map<String, dynamic> json) {
     return OfficeModel(
@@ -26,6 +30,8 @@ class OfficeModel {
       workingHours: json['workingHours'] as String,
       isOpen: json['isOpen'] as bool,
       address: json['address'] as String,
+      lat: (json['lat'] as num?)?.toDouble(),
+      lng: (json['lng'] as num?)?.toDouble(),
     );
   }
 }

@@ -166,6 +166,18 @@ def validate_gemini_response(
         return FALLBACK_ERROR
 
     # ── Repair partial response ────────────────────────────────────────────────
+    if not isinstance(data, dict):
+        logger.error("Gemini JSON root must be an object", root_type=type(data).__name__)
+        return FALLBACK_ERROR
+
+    if data.get("type", "procedure_guide") != "procedure_guide":
+        logger.error("Gemini JSON has an unsupported response type", response_type=data.get("type"))
+        return FALLBACK_ERROR
+
+    if "steps" not in data:
+        logger.error("Gemini JSON is missing required steps")
+        return FALLBACK_ERROR
+
     data = _repair_data(data)
 
     # ── Pydantic validation (should pass after repair) ─────────────────────────
