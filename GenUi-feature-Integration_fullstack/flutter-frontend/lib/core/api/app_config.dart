@@ -1,0 +1,18 @@
+import 'package:flutter/foundation.dart';
+
+class AppConfig {
+  AppConfig._();
+
+  static String get backendBaseUrl {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      return 'http://10.0.2.2:8000';
+    }
+    return 'http://127.0.0.1:8000';
+  }
+
+  static String get apiV1 => '$backendBaseUrl/api/v1';
+
+  static const String defaultLanguage = 'fr';
+
+  static const Duration requestTimeout = Duration(seconds: 30);
+}
