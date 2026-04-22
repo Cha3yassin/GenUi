@@ -23,15 +23,22 @@ final procedureDetailProvider = FutureProvider.family<ProcedureModel, String>((
 
 final categoryProceduresProvider =
     FutureProvider.family<List<ProcedureSummaryModel>, String>((
-      ref,
-      categoryId,
-    ) {
-      return ref.watch(apiServiceProvider).getProceduresByCategory(categoryId);
-    });
+  ref,
+  categoryId,
+) {
+  return ref.watch(apiServiceProvider).getProceduresByCategory(categoryId);
+});
 
-final nearbyOfficesProvider = FutureProvider.family<List<OfficeModel>, String?>(
-  (ref, stepId) {
-    return ref.watch(apiServiceProvider).getNearbyOffices(stepId: stepId);
+typedef NearbyOfficesQuery = ({String? stepId, double? lat, double? lng});
+
+final nearbyOfficesProvider =
+    FutureProvider.family<List<OfficeModel>, NearbyOfficesQuery>(
+  (ref, query) {
+    return ref.watch(apiServiceProvider).getNearbyOffices(
+          stepId: query.stepId,
+          lat: query.lat,
+          lng: query.lng,
+        );
   },
 );
 
@@ -53,7 +60,7 @@ final searchResultsProvider = FutureProvider<List<ProcedureSummaryModel>>((
   ref,
 ) async {
   final query = ref.watch(searchQueryProvider);
-  
+
   if (query.trim().length < 2) {
     return [];
   }
@@ -65,11 +72,10 @@ final searchResultsProvider = FutureProvider<List<ProcedureSummaryModel>>((
   });
 
   await Future<void>.delayed(const Duration(milliseconds: 400));
-  
+
   if (isCancelled) {
     throw Exception('Search cancelled due to debounce');
   }
 
   return ref.watch(apiServiceProvider).searchProcedures(query);
 });
-

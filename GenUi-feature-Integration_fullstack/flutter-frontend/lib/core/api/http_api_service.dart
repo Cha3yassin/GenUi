@@ -14,9 +14,10 @@ import 'language_utils.dart';
 import 'procedure_guide_adapter.dart';
 
 class ApiException implements Exception {
+  ApiException(this.message, [this.code]);
+
   final String message;
   final String? code;
-  ApiException(this.message, [this.code]);
 
   @override
   String toString() => 'ApiException: $message ($code)';
@@ -25,31 +26,34 @@ class ApiException implements Exception {
 class HttpApiService implements ApiService {
   final http.Client _client = http.Client();
 
-  Future<dynamic> _get(String path,
-      {Map<String, String>? queryParameters}) async {
-    final uri = Uri.parse('${AppConfig.apiV1}$path')
-        .replace(queryParameters: queryParameters);
+  Future<dynamic> _get(
+    String path, {
+    Map<String, String>? queryParameters,
+  }) async {
+    final uri = Uri.parse(
+      '${AppConfig.apiV1}$path',
+    ).replace(queryParameters: queryParameters);
+
     try {
       final response = await _client.get(uri).timeout(AppConfig.requestTimeout);
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return decoded;
-      } else {
-        throw ApiException(
-            decoded['message'] ?? 'Erreur Serveur', decoded['code']);
       }
+      throw ApiException(
+        decoded['message'] ?? 'Erreur serveur',
+        decoded['code'],
+      );
     } on TimeoutException {
-      throw ApiException(
-          'Délai d\'attente dépassé. Vérifiez votre connexion.', 'TIMEOUT');
+      throw ApiException('Delai de connexion depasse.', 'TIMEOUT');
     } on SocketException {
-      throw ApiException(
-          'Impossible de joindre le serveur. Vérifiez votre connexion.',
-          'NETWORK_ERROR');
+      throw ApiException('Impossible de joindre le serveur.', 'NETWORK_ERROR');
     }
   }
 
   Future<dynamic> _post(String path, Map<String, dynamic> body) async {
     final uri = Uri.parse('${AppConfig.apiV1}$path');
+
     try {
       final response = await _client
           .post(
@@ -61,68 +65,65 @@ class HttpApiService implements ApiService {
 
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        // FastAPI might return a 200 OK with an ErrorResponse body (e.g. from GenUI fallback)
         if (decoded is Map<String, dynamic> && decoded['type'] == 'error') {
           throw ApiException(
               decoded['message'] ?? 'Erreur IA', decoded['code']);
         }
         return decoded;
-      } else {
-        throw ApiException(
-            decoded['message'] ?? 'Erreur Serveur', decoded['code']);
       }
+      throw ApiException(
+        decoded['message'] ?? 'Erreur serveur',
+        decoded['code'],
+      );
     } on TimeoutException {
       throw ApiException(
-          'Le serveur IA met trop de temps à répondre.', 'TIMEOUT');
+          'Le service IA met trop de temps a repondre.', 'TIMEOUT');
     } on SocketException {
       throw ApiException(
-          'Impossible de connecter au serveur AI.', 'NETWORK_ERROR');
+          'Impossible de connecter au serveur IA.', 'NETWORK_ERROR');
     }
   }
 
   @override
   Future<List<CategoryModel>> getCategories() async {
-    // Currently, backend does not have a public /categories GET endpoint implemented in the provided code snippets (though it is registered).
-    // Fallback to static if backend isn't ready. This app uses hardcoded in mock so let's mock categories for now if you prefer or if we know it fails we can catch.
     try {
       final data = await _get('/categories') as List;
       return data
           .map((json) => CategoryModel.fromJson(json as Map<String, dynamic>))
           .toList();
     } catch (_) {
-      // Return predefined categories matching the mock but with IDs matching Backend Slugs
       return [
         CategoryModel.fromJson({
           'id': 'vehicles',
           'slug': 'vehicles',
-          'title': 'Véhicules',
+          'title': 'Vehicules',
           'description': 'Carte grise, vente...',
           'icon': 'directions_car',
-          'accentColor': 0xFFB45745
+          'accentColor': 0xFFB45745,
         }),
         CategoryModel.fromJson({
           'id': 'civil_status',
           'slug': 'civil_status',
-          'title': 'État Civil',
+          'title': 'Etat Civil',
           'description': 'Passeport, CIN...',
           'icon': 'badge',
-          'accentColor': 0xFF68775A
+          'accentColor': 0xFF68775A,
         }),
         CategoryModel.fromJson({
           'id': 'business',
           'slug': 'business',
           'title': 'Entreprises',
-          'description': 'Création, statuts...',
+          'description': 'Creation, statuts...',
           'icon': 'business_center',
-          'accentColor': 0xFF6F625D
+          'accentColor': 0xFF6F625D,
         }),
         CategoryModel.fromJson({
           'id': 'taxation',
           'slug': 'taxation',
-          'title': 'Fiscalité',
-          'description': 'Taxes, impôts...',
+          'title': 'Fiscalite',
+          'description': 'Taxes, impots...',
           'icon': 'receipt_percent',
-          'accentColor': 0xFF843B31
+          'accentColor': 0xFF843B31,
         }),
       ];
     }
@@ -131,6 +132,7 @@ class HttpApiService implements ApiService {
   @override
   Future<List<ProcedureSummaryModel>> searchProcedures(String query) async {
     if (query.trim().length < 2) return [];
+
     try {
       final data = await _get(
         '/procedures/search',
@@ -140,68 +142,80 @@ class HttpApiService implements ApiService {
         },
       );
       return (data as List)
-          .map((json) =>
-              ProcedureSummaryModel.fromJson(json as Map<String, dynamic>))
+          .map(
+            (json) =>
+                ProcedureSummaryModel.fromJson(json as Map<String, dynamic>),
+          )
           .toList();
     } catch (e) {
-      if (e is ApiException) throw e;
+      if (e is ApiException) rethrow;
       throw ApiException('Erreur inattendue lors de la recherche.');
     }
   }
 
   @override
   Future<List<ProcedureSummaryModel>> getProceduresByCategory(
-      String categoryId) async {
+    String categoryId,
+  ) async {
     try {
       final data = await _get('/procedures/by-category/$categoryId');
       return (data as List)
-          .map((json) =>
-              ProcedureSummaryModel.fromJson(json as Map<String, dynamic>))
+          .map(
+            (json) =>
+                ProcedureSummaryModel.fromJson(json as Map<String, dynamic>),
+          )
           .toList();
     } catch (e) {
-      if (e is ApiException) throw e;
-      throw ApiException('Erreur lors du chargement des procédures.');
+      if (e is ApiException) rethrow;
+      throw ApiException('Erreur lors du chargement des procedures.');
     }
   }
 
   @override
   Future<ProcedureModel> getProcedureDetail(String slug) async {
-    // We use GenUI search endpoint to generate procedure detail block on the fly!
-    // The slug is often effectively a search query like 'buy-used-car' or actual query.
     final message = slug.replaceAll('-', ' ');
     final language = LanguageUtils.preferredLanguageFor(message);
+
     try {
       final responseData = await _post('/gen-ui/search', {
         'message': message,
         'language': language,
       });
 
-      // Pass the response to the adapter
       return ProcedureGuideAdapter.fromJson(
         responseData as Map<String, dynamic>,
         slug: slug,
         language: language,
       );
     } catch (e) {
-      if (e is ApiException) throw e;
-      throw ApiException('Erreur inattendue. Veuillez réessayer.');
+      if (e is ApiException) rethrow;
+      throw ApiException('Erreur inattendue. Veuillez reessayer.');
     }
   }
 
   @override
-  Future<List<OfficeModel>> getNearbyOffices(
-      {String? stepId, double? lat, double? lng}) async {
-    // Keeping mock response format for offices until backend `/offices` endpoint is built
-    await Future.delayed(const Duration(milliseconds: 500));
-    return [
-      OfficeModel(
-          id: '1',
-          name: 'ATTT - Centre',
-          type: 'Véhicules',
-          address: 'Tunis',
-          distance: '1.2 km',
-          workingHours: '08:00 - 14:00',
-          isOpen: true),
-    ];
+  Future<List<OfficeModel>> getNearbyOffices({
+    String? stepId,
+    double? lat,
+    double? lng,
+  }) async {
+    try {
+      final query = <String, String>{};
+      if (stepId != null && stepId.trim().isNotEmpty) {
+        query['stepId'] = stepId;
+      }
+      if (lat != null && lng != null) {
+        query['lat'] = lat.toString();
+        query['lng'] = lng.toString();
+      }
+
+      final data = await _get('/offices/nearby', queryParameters: query);
+      return (data as List)
+          .map((json) => OfficeModel.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Erreur lors du chargement des localisations.');
+    }
   }
 }

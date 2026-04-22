@@ -136,11 +136,12 @@ def create_app() -> FastAPI:
         )
 
     # ── API Routers ────────────────────────────────────────────────────────────
-    from app.api.routes import auth, categories, chat, gen_ui, history, procedures
+    from app.api.routes import auth, categories, chat, gen_ui, history, offices, procedures
 
     app.include_router(auth.router, prefix="/api/v1")
     app.include_router(chat.router, prefix="/api/v1")
     app.include_router(gen_ui.router, prefix="/api/v1")
+    app.include_router(offices.router, prefix="/api/v1")
     app.include_router(procedures.router, prefix="/api/v1")
     app.include_router(categories.router, prefix="/api/v1")
     app.include_router(history.router, prefix="/api/v1")
