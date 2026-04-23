@@ -1,0 +1,124 @@
+# ============================================================
+# Fberaucracy Backend — Docker Compose
+# Runs: FastAPI app + PostgreSQL + Redis + Celery Worker
+# Note: ChromaDB runs embedded (persistent on disk), no separate service needed.
+# ============================================================
+
+version: "3.9"
+
+services:
+  # ── PostgreSQL ──────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: fberaucracy_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-fberaucracy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${POSTGRES_DB:-fberaucracy_db}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fberaucracy} -d ${POSTGRES_DB:-fberaucracy_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - fberaucracy_network
+
+  # ── Redis (Cache + Celery Broker/Backend) ──────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: fberaucracy_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - fberaucracy_network
+
+  # ── FastAPI Backend ─────────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: fberaucracy_api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      # Override hosts to use Docker service names
+      POSTGRES_HOST: postgres
+      REDIS_URL: redis://redis:6379/0
+      CHROMA_PERSIST_DIRECTORY: /app/chroma_data
+    volumes:
+      # Persist ChromaDB data between container restarts
+      - chroma_data:/app/chroma_data
+      # Persist logs
+      - ./logs:/app/logs
+      # Mount Firebase service account (optional — or use FIREBASE_SERVICE_ACCOUNT_JSON env var)
+      # - ./firebase_service_account.json:/app/firebase_service_account.json:ro
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - fberaucracy_network
+
+  # ── Celery Worker ───────────────────────────────────────────────────────────
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: fberaucracy_celery_worker
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      CHROMA_PERSIST_DIRECTORY: /app/chroma_data
+    volumes:
+      - chroma_data:/app/chroma_data
+      - ./logs:/app/logs
+    command: celery -A app.celery_app worker --loglevel=info --pool=solo --concurrency=1
+    networks:
+      - fberaucracy_network
+
+# ── Volumes ─────────────────────────────────────────────────────────────────
+volumes:
+  postgres_data:
+    driver: local
+  chroma_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# ── Networks ─────────────────────────────────────────────────────────────────
+networks:
+  fberaucracy_network:
+    driver: bridge
