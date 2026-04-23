@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../shared/models/category_model.dart';
+import '../../shared/models/history_summary_model.dart';
 import '../../shared/models/office_model.dart';
 import '../../shared/models/procedure_model.dart';
 import '../../shared/models/procedure_summary_model.dart';
@@ -12,7 +13,7 @@ class MockApiService implements ApiService {
   static const _networkDelay = Duration(milliseconds: 260);
 
   @override
-  Future<List<CategoryModel>> getCategories() async {
+  Future<List<CategoryModel>> getCategories({String? role}) async {
     await Future<void>.delayed(_networkDelay);
     return _categoriesJson.map(CategoryModel.fromJson).toList();
   }
@@ -52,7 +53,7 @@ class MockApiService implements ApiService {
   }
 
   @override
-  Future<ProcedureModel> getProcedureDetail(String slug) async {
+  Future<ProcedureModel> getProcedureDetail(String slug, {String? role}) async {
     await Future<void>.delayed(_networkDelay);
     final detail =
         _procedureDetailsJson[slug] ?? _procedureDetailsJson.values.first;
@@ -67,6 +68,18 @@ class MockApiService implements ApiService {
   }) async {
     await Future<void>.delayed(_networkDelay);
     return _officesJson.map(OfficeModel.fromJson).toList();
+  }
+
+  @override
+  Future<List<HistorySummary>> getHistorySummaries(String token) async {
+    await Future<void>.delayed(_networkDelay);
+    return [];
+  }
+
+  @override
+  Future<Map<String, dynamic>> getHistoryDetail(String token, String historyId) async {
+    await Future<void>.delayed(_networkDelay);
+    return {};
   }
 }
 
@@ -266,7 +279,7 @@ final Map<String, Map<String, dynamic>> _procedureDetailsJson = {
             {
               'question': 'Do fees change by vehicle type?',
               'answer':
-                  'Yes. Fiscal amounts can depend on horsepower, vehicle category and current finance rules. Treat Sahil estimates as guidance.',
+                  'Yes. Fiscal amounts can depend on horsepower, vehicle category and current finance rules. Treat Fbureaucracy estimates as guidance.',
             },
             {
               'question': 'What should I verify before payment?',

@@ -11,13 +11,17 @@ import '../../shared/models/procedure_model.dart';
 import '../../shared/widgets/status_badge.dart';
 
 class ProcedureDetailScreen extends ConsumerWidget {
-  const ProcedureDetailScreen({required this.slug, super.key});
+  const ProcedureDetailScreen({required this.slug, this.historyId, super.key});
 
   final String slug;
+  final String? historyId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailValue = ref.watch(procedureDetailProvider(slug));
+    // If historyId is provided, load from history; otherwise generate live
+    final detailValue = historyId != null && historyId!.isNotEmpty
+        ? ref.watch(historyDetailProvider(historyId!))
+        : ref.watch(procedureDetailProvider(slug));
     final isArabic = LanguageUtils.isArabic(slug);
     final textDirection = isArabic ? TextDirection.rtl : TextDirection.ltr;
 

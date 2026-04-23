@@ -49,6 +49,7 @@ def build_prompt(
     user_message: str,
     context_chunks: List[dict],
     language: str = "fr",
+    role: Optional[str] = None,
 ) -> str:
     """
     Construct the full structured-output prompt.
@@ -70,7 +71,10 @@ def build_prompt(
             )
         context_block = "\n".join(context_parts)
 
+        role_context = _build_role_context(role)
+
         return f"""You are a precise structured data formatter for Fbureaucracy, a Tunisian government procedures guide app.
+{role_context}
 
 STRICT RULES:
 1. Return ONLY valid JSON. No markdown fences, no explanations, no comments.
@@ -96,8 +100,11 @@ OUTPUT SCHEMA:
 
 Return ONLY the JSON object:"""
 
+    role_context = _build_role_context(role)
+
     return f"""You are Fbureaucracy, an expert assistant on Tunisian government administration procedures.
 You will answer a question about official Tunisian administrative procedures based on your training knowledge.
+{role_context}
 
 CRITICAL RULES:
 1. Return ONLY valid JSON matching the schema below. No markdown, no code fences.
@@ -120,6 +127,15 @@ OUTPUT SCHEMA:
 {_JSON_SCHEMA}
 
 Return ONLY the JSON object now:"""
+
+
+def _build_role_context(role: Optional[str]) -> str:
+    """Return a one-line role context string for the LLM prompt."""
+    if role == "enterprise":
+        return "USER CONTEXT: The user is a business/enterprise owner asking about corporate procedures.\n"
+    elif role == "individual":
+        return "USER CONTEXT: The user is an individual citizen asking about personal administrative procedures.\n"
+    return ""
 
 
 def _build_headers() -> dict[str, str]:
@@ -175,6 +191,7 @@ async def generate_procedure_response(
     user_message: str,
     context_chunks: List[dict],
     language: str = "fr",
+    role: Optional[str] = None,
     max_retries: int = 3,
 ) -> str:
     """
@@ -183,7 +200,7 @@ async def generate_procedure_response(
     Implements exponential backoff retry for transient API failures.
     Works in both grounded (RAG) and general-knowledge modes.
     """
-    prompt = build_prompt(user_message, context_chunks, language)
+    prompt = build_prompt(user_message, context_chunks, language, role=role)
     mode = "grounded" if context_chunks else "general-knowledge"
 
     logger.info(

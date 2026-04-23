@@ -49,6 +49,7 @@ class User(Base):
     )
     firebase_uid: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
     email: Mapped[Optional[str]] = mapped_column(String(320), nullable=True)
+    role: Mapped[str] = mapped_column(String(32), nullable=False, default="individual")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utcnow, server_default=func.now()
     )
@@ -113,6 +114,7 @@ class Category(Base):
     name_fr: Mapped[str] = mapped_column(String(256), nullable=False)
     name_en: Mapped[str] = mapped_column(String(256), nullable=False)
     icon: Mapped[str] = mapped_column(String(64), nullable=False)
+    target_role: Mapped[str] = mapped_column(String(32), nullable=False, default="all")
 
     def __repr__(self) -> str:
         return f"<Category slug={self.slug}>"

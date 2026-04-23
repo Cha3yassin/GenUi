@@ -80,6 +80,7 @@ async def generate_ui_from_search(
         query_preview=request.message[:60],
         language=request.language,
         category=request.category,
+        role=request.role,
     )
 
     task = celery.send_task(
@@ -88,6 +89,7 @@ async def generate_ui_from_search(
             "user_message": request.message,
             "language": request.language,
             "category": request.category,
+            "role": request.role,
         },
     )
 

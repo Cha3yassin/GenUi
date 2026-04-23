@@ -11,11 +11,12 @@ from pydantic import BaseModel, Field, field_validator
 
 class ChatRequest(BaseModel):
     """
-    Payload for POST /chat.
+    Payload for POST /chat and POST /gen-ui/search.
 
     - message: The user's natural-language question.
     - language: ISO 639-1 code. Controls the response language preference.
     - category: Optional hint that narrows RAG search scope.
+    - role: Optional user role for context-aware LLM generation.
     """
     message: str = Field(
         ...,
@@ -33,6 +34,10 @@ class ChatRequest(BaseModel):
         max_length=64,
         description="Optional procedure category slug to narrow the search.",
         examples=["vehicles", "civil_status", "taxation"],
+    )
+    role: Optional[Literal["individual", "enterprise"]] = Field(
+        default=None,
+        description="User role for context-aware LLM generation.",
     )
 
     @field_validator("message")
@@ -54,7 +59,25 @@ class ChatRequest(BaseModel):
                     "message": "How do I renew my carte grise?",
                     "language": "fr",
                     "category": "vehicles",
+                    "role": "individual",
                 }
             ]
         }
     }
+
+
+class LoginRequest(BaseModel):
+    """
+    Payload for POST /auth/login.
+
+    Flutter sends the Firebase ID token and the user's selected role.
+    """
+    id_token: str = Field(
+        ...,
+        min_length=10,
+        description="Firebase ID token from Flutter Google Sign-In.",
+    )
+    role: Literal["individual", "enterprise"] = Field(
+        default="individual",
+        description="User's selected role.",
+    )

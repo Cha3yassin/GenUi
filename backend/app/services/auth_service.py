@@ -21,6 +21,7 @@ logger = get_logger(__name__)
 async def get_or_create_user(
     db: AsyncSession,
     token: DecodedToken,
+    role: Optional[str] = None,
 ) -> User:
     """
     Return the existing User row for this Firebase UID, or create one if
@@ -29,6 +30,7 @@ async def get_or_create_user(
     Args:
         db: An active async SQLAlchemy session.
         token: Decoded Firebase token claims from the security dependency.
+        role: Optional role to assign ("individual" or "enterprise").
 
     Returns:
         The User ORM instance (persisted in DB).
@@ -40,11 +42,12 @@ async def get_or_create_user(
     user: Optional[User] = result.scalar_one_or_none()
 
     if user is None:
-        logger.info("Creating new user", firebase_uid=token.uid, email=token.email)
+        logger.info("Creating new user", firebase_uid=token.uid, email=token.email, role=role)
         user = User(
             id=uuid.uuid4(),
             firebase_uid=token.uid,
             email=token.email,
+            role=role or "individual",
         )
         db.add(user)
         await db.flush()  # Write to DB within the current transaction (no commit yet)
@@ -52,6 +55,45 @@ async def get_or_create_user(
         # Update email if Firebase has a newer value
         if token.email and user.email != token.email:
             user.email = token.email
+        # Update role if provided and different
+        if role and user.role != role:
+            user.role = role
+            logger.info("User role updated", firebase_uid=token.uid, new_role=role)
+
+    return user
+
+
+async def get_or_create_user_from_claims(
+    db: AsyncSession,
+    uid: str,
+    email: Optional[str],
+    role: str = "individual",
+) -> User:
+    """
+    Create or update a user from raw Firebase claims (used by /auth/login).
+
+    Unlike get_or_create_user, this doesn't require a DecodedToken wrapper.
+    """
+    result = await db.execute(
+        select(User).where(User.firebase_uid == uid)
+    )
+    user: Optional[User] = result.scalar_one_or_none()
+
+    if user is None:
+        logger.info("Creating new user via login", firebase_uid=uid, email=email, role=role)
+        user = User(
+            id=uuid.uuid4(),
+            firebase_uid=uid,
+            email=email,
+            role=role,
+        )
+        db.add(user)
+        await db.flush()
+    else:
+        if email and user.email != email:
+            user.email = email
+        if user.role != role:
+            user.role = role
 
     return user
 

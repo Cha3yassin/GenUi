@@ -1,24 +1,31 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../shared/models/category_model.dart';
+import '../../shared/models/history_summary_model.dart';
 import '../../shared/models/office_model.dart';
 import '../../shared/models/procedure_model.dart';
 import '../../shared/models/procedure_summary_model.dart';
+import '../auth/auth_provider.dart';
 import 'api_service.dart';
 import 'http_api_service.dart';
+import 'procedure_guide_adapter.dart';
 
-/// Provide the REAL API service instead of the Mock
+/// Provide the REAL API service
 final apiServiceProvider = Provider<ApiService>((ref) => HttpApiService());
 
+/// Categories — filtered by user role if authenticated.
 final categoriesProvider = FutureProvider<List<CategoryModel>>((ref) {
-  return ref.watch(apiServiceProvider).getCategories();
+  final role = ref.watch(userRoleProvider);
+  return ref.watch(apiServiceProvider).getCategories(role: role);
 });
 
+/// Procedure detail — passes user role for context-aware generation.
 final procedureDetailProvider = FutureProvider.family<ProcedureModel, String>((
   ref,
   slug,
 ) {
-  return ref.watch(apiServiceProvider).getProcedureDetail(slug);
+  final role = ref.watch(userRoleProvider);
+  return ref.watch(apiServiceProvider).getProcedureDetail(slug, role: role);
 });
 
 final categoryProceduresProvider =
@@ -65,7 +72,6 @@ final searchResultsProvider = FutureProvider<List<ProcedureSummaryModel>>((
     return [];
   }
 
-  // Debounce: Cancel the request if the user types another letter within 400ms
   var isCancelled = false;
   ref.onDispose(() {
     isCancelled = true;
@@ -78,4 +84,32 @@ final searchResultsProvider = FutureProvider<List<ProcedureSummaryModel>>((
   }
 
   return ref.watch(apiServiceProvider).searchProcedures(query);
+});
+
+/// History summaries for the drawer (requires auth).
+final historySummariesProvider = FutureProvider<List<HistorySummary>>((ref) async {
+  final authState = ref.watch(authProvider);
+  if (!authState.isAuthenticated) return [];
+
+  final token = authState.user!.firebaseToken;
+  return ref.watch(apiServiceProvider).getHistorySummaries(token);
+});
+
+/// History detail — fetches full JSON for a past procedure, renders instantly.
+final historyDetailProvider =
+    FutureProvider.family<ProcedureModel, String>((ref, historyId) async {
+  final authState = ref.watch(authProvider);
+  if (!authState.isAuthenticated) {
+    throw Exception('Not authenticated');
+  }
+
+  final token = authState.user!.firebaseToken;
+  final data = await ref.watch(apiServiceProvider).getHistoryDetail(token, historyId);
+  final aiResponse = data['ai_response'] as Map<String, dynamic>;
+
+  return ProcedureGuideAdapter.fromJson(
+    aiResponse,
+    slug: 'history-$historyId',
+    language: 'fr',
+  );
 });

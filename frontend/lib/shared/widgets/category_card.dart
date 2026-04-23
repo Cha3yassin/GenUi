@@ -3,10 +3,16 @@ import 'package:flutter/material.dart';
 import '../models/category_model.dart';
 
 class CategoryCard extends StatelessWidget {
-  const CategoryCard({required this.category, required this.onTap, super.key});
+  const CategoryCard({
+    required this.category,
+    required this.onTap,
+    this.locale = 'fr',
+    super.key,
+  });
 
   final CategoryModel category;
   final VoidCallback onTap;
+  final String locale;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +36,7 @@ class CategoryCard extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                category.title,
+                category.title(locale),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 6),

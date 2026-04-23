@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/login_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/offices/office_locator_screen.dart';
 import '../../features/procedures/category_procedures_screen.dart';
@@ -16,6 +17,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RoutePaths.splash,
         builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.login,
+        builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
         path: RoutePaths.home,
@@ -42,6 +47,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: RoutePaths.offices,
         builder: (context, state) =>
             OfficeLocatorScreen(stepId: state.uri.queryParameters['stepId']),
+      ),
+      GoRoute(
+        path: '/history/:historyId',
+        builder: (context, state) {
+          final historyId = state.pathParameters['historyId'] ?? '';
+          return ProcedureDetailScreen(
+            slug: 'history-$historyId',
+            historyId: historyId,
+          );
+        },
       ),
     ],
   );

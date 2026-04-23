@@ -88,3 +88,19 @@ async def get_user_history(
     items: List[ChatHistory] = list(result.scalars().all())
 
     return items, total
+
+
+async def get_history_by_id(
+    db: AsyncSession,
+    history_id: uuid.UUID,
+) -> Optional[ChatHistory]:
+    """
+    Retrieve a single chat history entry by its ID.
+
+    Returns None if the entry does not exist.
+    """
+    result = await db.execute(
+        select(ChatHistory).where(ChatHistory.id == history_id)
+    )
+    return result.scalar_one_or_none()
+

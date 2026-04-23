@@ -37,6 +37,7 @@ def generate_procedure_task(
     user_message: str,
     language: str = "fr",
     category: Optional[str] = None,
+    role: Optional[str] = None,
 ):
     """
     Background task: RAG search → OpenRouter → Validate → Cache.
@@ -45,6 +46,7 @@ def generate_procedure_task(
         user_message: The user's natural-language query.
         language: ISO 639-1 code (ar/fr/en).
         category: Optional category slug for narrowing RAG search.
+        role: Optional user role for context-aware generation.
 
     Returns:
         dict — Validated ProcedureGuideResponse or ErrorResponse as a dict.
@@ -89,6 +91,7 @@ def generate_procedure_task(
                 user_message=user_message,
                 context_chunks=context_chunks,
                 language=language,
+                role=role,
             )
         )
     except RuntimeError as exc:

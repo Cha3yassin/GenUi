@@ -1,5 +1,5 @@
-name: sahil
-description: "A new Flutter project."
+name: fbureaucracy
+description: "Tunisian bureaucratic procedures guide — step by step."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -40,8 +40,13 @@ dependencies:
   go_router: any
   intl: any
   http: any
+  google_fonts: any
   geolocator: ^14.0.2
   url_launcher: ^6.3.2
+  firebase_core: ^4.7.0
+  firebase_auth: ^6.4.0
+  google_sign_in: ^7.2.0
+  shared_preferences: ^2.5.5
 
 dev_dependencies:
   flutter_test:

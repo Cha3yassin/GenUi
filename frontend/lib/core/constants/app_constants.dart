@@ -3,9 +3,9 @@ import 'package:flutter/widgets.dart';
 class AppConstants {
   const AppConstants._();
 
-  static const appName = 'Sahil';
-  static const appArabicName = 'ساهل';
+  static const appName = 'Fbureaucracy';
+  static const appArabicName = 'Fb';
   static const appTagline = 'Les démarches tunisiennes, étape par étape.';
 
-  static const supportedLocales = [Locale('fr'), Locale('ar')];
+  static const supportedLocales = [Locale('fr'), Locale('en'), Locale('ar')];
 }

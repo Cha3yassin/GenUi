@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 import '../../shared/models/category_model.dart';
+import '../../shared/models/history_summary_model.dart';
 import '../../shared/models/office_model.dart';
 import '../../shared/models/procedure_model.dart';
 import '../../shared/models/procedure_summary_model.dart';
@@ -26,16 +27,24 @@ class ApiException implements Exception {
 class HttpApiService implements ApiService {
   final http.Client _client = http.Client();
 
+  // ── Private helpers ────────────────────────────────────────────────────────
+
   Future<dynamic> _get(
     String path, {
     Map<String, String>? queryParameters,
+    String? token,
   }) async {
     final uri = Uri.parse(
       '${AppConfig.apiV1}$path',
     ).replace(queryParameters: queryParameters);
 
     try {
-      final response = await _client.get(uri).timeout(AppConfig.requestTimeout);
+      final headers = <String, String>{};
+      if (token != null) {
+        headers['Authorization'] = 'Bearer $token';
+      }
+      final response =
+          await _client.get(uri, headers: headers).timeout(AppConfig.requestTimeout);
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return decoded;
@@ -84,10 +93,14 @@ class HttpApiService implements ApiService {
     }
   }
 
+  // ── Categories ─────────────────────────────────────────────────────────────
+
   @override
-  Future<List<CategoryModel>> getCategories() async {
+  Future<List<CategoryModel>> getCategories({String? role}) async {
     try {
-      final data = await _get('/categories') as List;
+      final query = <String, String>{};
+      if (role != null) query['role'] = role;
+      final data = await _get('/categories', queryParameters: query.isNotEmpty ? query : null) as List;
       return data
           .map((json) => CategoryModel.fromJson(json as Map<String, dynamic>))
           .toList();
@@ -128,6 +141,8 @@ class HttpApiService implements ApiService {
       ];
     }
   }
+
+  // ── Search ─────────────────────────────────────────────────────────────────
 
   @override
   Future<List<ProcedureSummaryModel>> searchProcedures(String query) async {
@@ -171,25 +186,31 @@ class HttpApiService implements ApiService {
     }
   }
 
+  // ── GenUI with polling ─────────────────────────────────────────────────────
+
   @override
-  Future<ProcedureModel> getProcedureDetail(String slug) async {
+  Future<ProcedureModel> getProcedureDetail(String slug, {String? role}) async {
     final message = slug.replaceAll('-', ' ');
     final language = LanguageUtils.preferredLanguageFor(message);
 
     try {
-      // ── Step 1: POST the search request ──────────────────────────────────
       final uri = Uri.parse('${AppConfig.apiV1}/gen-ui/search');
+      final body = <String, dynamic>{
+        'message': message,
+        'language': language,
+      };
+      if (role != null) body['role'] = role;
+
       final response = await _client
           .post(
             uri,
             headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({'message': message, 'language': language}),
+            body: jsonEncode(body),
           )
           .timeout(AppConfig.requestTimeout);
 
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
 
-      // ── Step 2: Handle cache hit (200 with procedure_guide) ──────────────
       if (response.statusCode == 200) {
         if (decoded is Map<String, dynamic> && decoded['type'] == 'error') {
           throw ApiException(
@@ -202,7 +223,6 @@ class HttpApiService implements ApiService {
         );
       }
 
-      // ── Step 3: Handle cache miss (202 with task_id) ─────────────────────
       if (response.statusCode == 202 &&
           decoded is Map<String, dynamic> &&
           decoded['task_id'] != null) {
@@ -210,9 +230,10 @@ class HttpApiService implements ApiService {
         return _pollForResult(taskId, slug, language);
       }
 
-      // Unexpected status code
       throw ApiException(
-        decoded is Map ? (decoded['message'] ?? 'Erreur serveur') : 'Erreur serveur',
+        decoded is Map
+            ? (decoded['message'] ?? 'Erreur serveur')
+            : 'Erreur serveur',
         decoded is Map ? decoded['code'] : null,
       );
     } on TimeoutException {
@@ -224,7 +245,6 @@ class HttpApiService implements ApiService {
     }
   }
 
-  /// Polls the task status endpoint until the task completes, fails, or times out.
   Future<ProcedureModel> _pollForResult(
     String taskId,
     String slug,
@@ -265,13 +285,9 @@ class HttpApiService implements ApiService {
             'TASK_FAILED',
           );
         }
-
-        // status == 'processing' → continue polling
       } on ApiException {
         rethrow;
-      } catch (_) {
-        // Network hiccup during poll — retry on next interval
-      }
+      } catch (_) {}
     }
 
     throw ApiException(
@@ -279,6 +295,8 @@ class HttpApiService implements ApiService {
       'POLL_TIMEOUT',
     );
   }
+
+  // ── Offices ────────────────────────────────────────────────────────────────
 
   @override
   Future<List<OfficeModel>> getNearbyOffices({
@@ -303,6 +321,34 @@ class HttpApiService implements ApiService {
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException('Erreur lors du chargement des localisations.');
+    }
+  }
+
+  // ── History (authenticated) ────────────────────────────────────────────────
+
+  @override
+  Future<List<HistorySummary>> getHistorySummaries(String token) async {
+    try {
+      final data = await _get('/history/me/summaries', token: token);
+      final items = (data['items'] as List?) ?? [];
+      return items
+          .map((json) => HistorySummary.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Erreur lors du chargement de l\'historique.');
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getHistoryDetail(
+      String token, String historyId) async {
+    try {
+      final data = await _get('/history/me/$historyId', token: token);
+      return data as Map<String, dynamic>;
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Erreur lors du chargement du détail.');
     }
   }
 }

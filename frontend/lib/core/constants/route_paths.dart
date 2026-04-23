@@ -2,6 +2,7 @@ class RoutePaths {
   const RoutePaths._();
 
   static const splash = '/';
+  static const login = '/login';
   static const home = '/home';
   static const search = '/search';
   static const offices = '/offices';
@@ -16,5 +17,9 @@ class RoutePaths {
           categoryId,
           'procedures',
         ])}';
+  }
+
+  static String historyDetail(String historyId) {
+    return '/history/$historyId';
   }
 }

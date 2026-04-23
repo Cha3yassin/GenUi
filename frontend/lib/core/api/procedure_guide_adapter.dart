@@ -188,7 +188,7 @@ class ProcedureGuideAdapter {
       return const _ProcedureLabels(
         fallbackTitle: 'إجراء إداري',
         generatedSummary:
-            'دليل مولد بالذكاء الاصطناعي من Sahil اعتمادا على المعلومات الإدارية.',
+            'دليل مولد بالذكاء الاصطناعي من Fbureaucracy اعتمادا على المعلومات الإدارية.',
         assistant: 'المساعد',
         variable: 'متغير',
         beforeStart: 'قبل أن تبدأ',
@@ -210,10 +210,36 @@ class ProcedureGuideAdapter {
       );
     }
 
+    if (language == 'en') {
+      return const _ProcedureLabels(
+        fallbackTitle: 'Administrative Procedure',
+        generatedSummary:
+            'AI-generated guide by Fbureaucracy based on administrative information.',
+        assistant: 'Assistant',
+        variable: 'Variable',
+        beforeStart: 'Before you begin',
+        stepsTitle: 'Procedure Steps',
+        stepsSubtitle: 'Follow these instructions to complete the process.',
+        documentsTitle: 'Required Documents',
+        documentsSubtitle: 'Make sure to prepare these documents.',
+        costsTitle: 'Estimated Fees',
+        costsSubtitle: 'Official amounts may vary slightly.',
+        officeTitle: 'Responsible Office',
+        officeSubtitle: 'Where to go.',
+        adminFees: 'Administrative fees',
+        adminOffice: 'Administrative Office',
+        contactLocalOffice: 'Contact the local administration.',
+        address: 'Address',
+        hours: 'Hours',
+        phone: 'Phone',
+        current: 'Current',
+      );
+    }
+
     return const _ProcedureLabels(
       fallbackTitle: 'Procédure Administrative',
       generatedSummary:
-          "Guide généré par l'IA de Sahil basé sur les informations administratives.",
+          "Guide généré par l'IA de Fbureaucracy basé sur les informations administratives.",
       assistant: 'Assistant',
       variable: 'Variable',
       beforeStart: 'Avant de commencer',

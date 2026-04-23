@@ -109,7 +109,17 @@ class CategoryResponse(BaseModel):
     icon: str = Field(..., description="Icon identifier for Flutter rendering")
 
 
-# ── Chat History Response ──────────────────────────────────────────────────────
+# ── Auth Response ──────────────────────────────────────────────────────────────
+
+class LoginResponse(BaseModel):
+    """Returned by POST /auth/login after successful Firebase token verification."""
+    user_id: str = Field(..., description="Internal database UUID")
+    email: Optional[str] = Field(default=None)
+    role: Literal["individual", "enterprise"]
+    message: str = Field(default="Login successful")
+
+
+# ── Chat History Responses ─────────────────────────────────────────────────────
 
 class ChatHistoryItem(BaseModel):
     """A single chat exchange in the history list."""
@@ -126,6 +136,27 @@ class ChatHistoryResponse(BaseModel):
     user_id: uuid.UUID
     total: int
     items: List[ChatHistoryItem]
+
+
+class HistorySummaryItem(BaseModel):
+    """Lightweight history item for the sidebar drawer (title + date only)."""
+    id: uuid.UUID
+    title: str = Field(..., description="Extracted from ai_response title")
+    created_at: datetime
+
+
+class HistorySummaryResponse(BaseModel):
+    """List of history summaries for the drawer."""
+    items: List[HistorySummaryItem]
+    total: int
+
+
+class HistoryDetailResponse(BaseModel):
+    """Full history item for re-rendering a past procedure."""
+    id: uuid.UUID
+    user_message: str
+    ai_response: Dict[str, Any]
+    created_at: datetime
 
 
 # ── Task Queue Response Models ─────────────────────────────────────────────────

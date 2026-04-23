@@ -1,8 +1,9 @@
 """
-api/routes/history.py — Chat History Endpoint
+api/routes/history.py — Chat History Endpoints
 
-GET /history/{user_id} — Returns paginated chat history for a user.
-Only the authenticated user can access their own history.
+GET /history/{user_id} — Returns paginated chat history for a user (legacy).
+GET /history/me/summaries — Lightweight summaries for sidebar drawer.
+GET /history/me/{history_id} — Full detail for re-rendering a past procedure.
 """
 
 import json
@@ -15,23 +16,137 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.logging import get_logger
 from app.core.security import CurrentUser
 from app.db.session import get_db
-from app.schemas.responses import ChatHistoryItem, ChatHistoryResponse
+from app.schemas.responses import (
+    ChatHistoryItem,
+    ChatHistoryResponse,
+    HistoryDetailResponse,
+    HistorySummaryItem,
+    HistorySummaryResponse,
+)
 from app.services.auth_service import get_user_by_firebase_uid
-from app.services.history_service import get_user_history
+from app.services.history_service import get_user_history, get_history_by_id
 
 logger = get_logger(__name__)
 
 router = APIRouter(prefix="/history", tags=["History"])
 
 
+# ── Lightweight summaries for the Drawer ──────────────────────────────────────
+
+@router.get(
+    "/me/summaries",
+    response_model=HistorySummaryResponse,
+    summary="Get history summaries for sidebar",
+    description=(
+        "Returns lightweight history items (title + date) for the "
+        "authenticated user. Used by the Flutter Drawer sidebar."
+    ),
+)
+async def get_my_history_summaries(
+    current_user: CurrentUser,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    limit: int = Query(default=50, ge=1, le=200),
+) -> HistorySummaryResponse:
+    """
+    Returns title + date only — no full ai_response payloads.
+    Title is extracted from the stored JSON's title field.
+    """
+    user = await get_user_by_firebase_uid(db, current_user.uid)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found. Please login first.",
+        )
+
+    history_rows, total = await get_user_history(
+        db=db, user_id=user.id, limit=limit, offset=0,
+    )
+
+    items = []
+    for row in history_rows:
+        # Extract title from the stored JSON
+        title = row.user_message  # fallback
+        try:
+            ai_data = json.loads(row.ai_response)
+            title_obj = ai_data.get("title", {})
+            if isinstance(title_obj, dict):
+                title = (
+                    title_obj.get("fr")
+                    or title_obj.get("en")
+                    or title_obj.get("ar")
+                    or row.user_message
+                )
+            elif isinstance(title_obj, str):
+                title = title_obj
+        except (json.JSONDecodeError, TypeError):
+            pass
+
+        items.append(
+            HistorySummaryItem(
+                id=row.id,
+                title=title,
+                created_at=row.created_at,
+            )
+        )
+
+    return HistorySummaryResponse(items=items, total=total)
+
+
+# ── Full detail for re-rendering a past procedure ─────────────────────────────
+
+@router.get(
+    "/me/{history_id}",
+    response_model=HistoryDetailResponse,
+    summary="Get full history detail",
+    description=(
+        "Returns the full ai_response JSON for a single history item. "
+        "Flutter renders this directly via ProcedureGuideAdapter."
+    ),
+)
+async def get_history_detail(
+    history_id: uuid.UUID,
+    current_user: CurrentUser,
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> HistoryDetailResponse:
+    """
+    Returns full JSON for instant re-rendering without LLM call.
+    """
+    user = await get_user_by_firebase_uid(db, current_user.uid)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found.",
+        )
+
+    row = await get_history_by_id(db, history_id)
+    if not row or row.user_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="History item not found.",
+        )
+
+    try:
+        ai_response_dict = json.loads(row.ai_response)
+    except (json.JSONDecodeError, TypeError):
+        ai_response_dict = {"type": "error", "message": "Malformed response data."}
+
+    return HistoryDetailResponse(
+        id=row.id,
+        user_message=row.user_message,
+        ai_response=ai_response_dict,
+        created_at=row.created_at,
+    )
+
+
+# ── Legacy paginated history (existing endpoint) ─────────────────────────────
+
 @router.get(
     "/{user_id}",
     response_model=ChatHistoryResponse,
-    summary="Get user chat history",
+    summary="Get user chat history (legacy)",
     description=(
         "Returns paginated chat history for the specified user. "
-        "Users can only access their own history. "
-        "Responses are returned as parsed JSON objects, not raw strings."
+        "Users can only access their own history."
     ),
 )
 async def get_history(
@@ -43,19 +158,15 @@ async def get_history(
 ) -> ChatHistoryResponse:
     """
     Returns a user's conversation history.
-
     Authorization: A user may only retrieve their own history.
-    Admins are not currently supported (can be added via custom claims).
     """
-    # Look up the requesting user to get their internal UUID
     requesting_user = await get_user_by_firebase_uid(db, current_user.uid)
     if not requesting_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Authenticated user not found in database. Please register first.",
+            detail="Authenticated user not found in database.",
         )
 
-    # Authorization check — users can only see their own history
     if requesting_user.id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -63,20 +174,15 @@ async def get_history(
         )
 
     history_rows, total = await get_user_history(
-        db=db,
-        user_id=user_id,
-        limit=limit,
-        offset=offset,
+        db=db, user_id=user_id, limit=limit, offset=offset,
     )
 
-    # Deserialise ai_response from JSON string to dict for Flutter
     items = []
     for row in history_rows:
         try:
             ai_response_dict = json.loads(row.ai_response)
         except (json.JSONDecodeError, TypeError):
             ai_response_dict = {"type": "error", "message": "Malformed response data."}
-
         items.append(
             ChatHistoryItem(
                 id=row.id,
@@ -86,15 +192,4 @@ async def get_history(
             )
         )
 
-    logger.debug(
-        "History retrieved",
-        user_id=str(user_id),
-        total=total,
-        returned=len(items),
-    )
-
-    return ChatHistoryResponse(
-        user_id=user_id,
-        total=total,
-        items=items,
-    )
+    return ChatHistoryResponse(user_id=user_id, total=total, items=items)
