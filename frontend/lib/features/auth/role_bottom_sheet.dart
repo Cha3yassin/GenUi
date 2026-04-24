@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/genui/profile_config.dart';
 import '../../core/locale/app_strings.dart';
 import '../../core/locale/locale_provider.dart';
 import '../../core/theme/app_theme.dart';
@@ -66,20 +67,20 @@ class RoleBottomSheet extends ConsumerWidget {
 
             // Individual option
             _RoleOption(
+              profile: ProfileType.individual,
               icon: Icons.person_rounded,
               title: AppStrings.get('individual', locale),
               subtitle: AppStrings.get('individual_desc', locale),
-              color: AppTheme.olive,
               onTap: () => Navigator.pop(context, 'individual'),
             ),
             const SizedBox(height: 12),
 
             // Enterprise option
             _RoleOption(
+              profile: ProfileType.enterprise,
               icon: Icons.business_rounded,
               title: AppStrings.get('enterprise', locale),
               subtitle: AppStrings.get('enterprise_desc', locale),
-              color: AppTheme.deepTerracotta,
               onTap: () => Navigator.pop(context, 'enterprise'),
             ),
           ],
@@ -91,17 +92,17 @@ class RoleBottomSheet extends ConsumerWidget {
 
 class _RoleOption extends StatefulWidget {
   const _RoleOption({
+    required this.profile,
     required this.icon,
     required this.title,
     required this.subtitle,
-    required this.color,
     required this.onTap,
   });
 
+  final ProfileType profile;
   final IconData icon;
   final String title;
   final String subtitle;
-  final Color color;
   final VoidCallback onTap;
 
   @override
@@ -113,61 +114,242 @@ class _RoleOptionState extends State<_RoleOption> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = getThemeByProfile(widget.profile);
+    final isEnterprise = widget.profile == ProfileType.enterprise;
+
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOut,
-        decoration: BoxDecoration(
-          color: _isHovered ? widget.color.withOpacity(0.04) : AppTheme.paper,
+      child: isEnterprise
+          ? _EnterpriseRoleCard(
+              theme: theme,
+              title: widget.title,
+              subtitle: widget.subtitle,
+              icon: widget.icon,
+              isHovered: _isHovered,
+              onTap: widget.onTap,
+            )
+          : _IndividualRoleCard(
+              theme: theme,
+              title: widget.title,
+              subtitle: widget.subtitle,
+              icon: widget.icon,
+              isHovered: _isHovered,
+              onTap: widget.onTap,
+            ),
+    );
+  }
+}
+
+class _IndividualRoleCard extends StatelessWidget {
+  const _IndividualRoleCard({
+    required this.theme,
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.isHovered,
+    required this.onTap,
+  });
+
+  final ProfileThemeData theme;
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final bool isHovered;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+      decoration: BoxDecoration(
+        color: isHovered ? theme.surfaceTint : AppTheme.paper,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isHovered
+              ? theme.accent.withValues(alpha: 0.28)
+              : theme.borderTint,
+          width: isHovered ? 1.5 : 1,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: _isHovered
-                ? widget.color.withOpacity(0.3)
-                : AppTheme.borderLight,
-            width: _isHovered ? 1.5 : 1,
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Row(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: theme.accent.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(icon, color: theme.accent, size: 26),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title,
+                          style: Theme.of(context).textTheme.titleMedium),
+                      const SizedBox(height: 3),
+                      Text(subtitle,
+                          style: Theme.of(context).textTheme.bodySmall),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 14,
+                  color: theme.accent.withValues(alpha: 0.45),
+                ),
+              ],
+            ),
           ),
         ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: widget.onTap,
-            borderRadius: BorderRadius.circular(18),
-            child: Padding(
-              padding: const EdgeInsets.all(18),
-              child: Row(
-                children: [
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: widget.color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Icon(widget.icon, color: widget.color, size: 26),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.title,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          widget.subtitle,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(Icons.arrow_forward_ios_rounded,
-                      size: 14, color: widget.color.withOpacity(0.4)),
+      ),
+    );
+  }
+}
+
+class _EnterpriseRoleCard extends StatelessWidget {
+  const _EnterpriseRoleCard({
+    required this.theme,
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.isHovered,
+    required this.onTap,
+  });
+
+  final ProfileThemeData theme;
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final bool isHovered;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOut,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isHovered
+              ? [
+                  const Color(0xFF111B2E),
+                  const Color(0xFF1E3154),
+                  const Color(0xFF2F4B7C),
+                ]
+              : [
+                  const Color(0xFF172033),
+                  const Color(0xFF243B63),
+                  const Color(0xFF2F4B7C),
                 ],
-              ),
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: theme.professionalAccent.withValues(
+            alpha: isHovered ? 0.42 : 0.26,
+          ),
+          width: isHovered ? 1.4 : 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: theme.accent.withValues(alpha: isHovered ? 0.22 : 0.14),
+            blurRadius: isHovered ? 26 : 18,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(18),
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Row(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: theme.professionalAccent.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: theme.professionalAccent.withValues(alpha: 0.26),
+                    ),
+                  ),
+                  child: Icon(icon, color: theme.professionalAccent, size: 26),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              title,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    color: Colors.white,
+                                  ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.10),
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.12),
+                              ),
+                            ),
+                            child: Text(
+                              'Pro',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelLarge
+                                  ?.copyWith(
+                                    color: theme.professionalAccent,
+                                  ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: theme.heroMutedForeground,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 14,
+                  color: theme.professionalAccent.withValues(alpha: 0.88),
+                ),
+              ],
             ),
           ),
         ),

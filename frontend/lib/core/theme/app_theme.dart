@@ -1,26 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// App theme — Warm, earthy, editorial aesthetic.
-/// Inspired by Tunisian terracotta and sand.
+/// App theme with a clean blue and white administrative palette.
 class AppTheme {
   const AppTheme._();
 
-  // ── Brand Colors ────────────────────────────────────────────────────────────
-  static const Color terracotta = Color(0xFFB45745);
-  static const Color deepTerracotta = Color(0xFF843B31);
-  static const Color warmCoral = Color(0xFFD4715E);
-  static const Color sand = Color(0xFFF5EFE7);
-  static const Color paper = Color(0xFFFFFBF6);
-  static const Color cream = Color(0xFFFFF8F0);
-  static const Color ink = Color(0xFF1A1614);
-  static const Color mutedInk = Color(0xFF6F625D);
-  static const Color olive = Color(0xFF5E7049);
-  static const Color softOlive = Color(0xFF8A9A72);
-  static const Color borderLight = Color(0xFFE8DFD6);
-  static const Color surfaceTint = Color(0xFFFFF0EA);
+  static const Color terracotta = Color(0xFF2563EB);
+  static const Color deepTerracotta = Color(0xFF1E3A8A);
+  static const Color warmCoral = Color(0xFF38BDF8);
+  static const Color sand = Color(0xFFF3F7FD);
+  static const Color paper = Color(0xFFFFFFFF);
+  static const Color cream = Color(0xFFF8FBFF);
+  static const Color ink = Color(0xFF10233F);
+  static const Color mutedInk = Color(0xFF5D6F8B);
+  static const Color olive = Color(0xFF0F4C81);
+  static const Color softOlive = Color(0xFF7AA8D8);
+  static const Color borderLight = Color(0xFFD7E4F3);
+  static const Color surfaceTint = Color(0xFFEAF3FF);
 
-  // ── Light Theme ─────────────────────────────────────────────────────────────
   static ThemeData light() {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: terracotta,
@@ -120,7 +117,7 @@ class AppTheme {
             const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         hintStyle: GoogleFonts.dmSans(
           fontSize: 14,
-          color: mutedInk.withOpacity(0.6),
+          color: mutedInk.withValues(alpha: 0.6),
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -144,22 +141,21 @@ class AppTheme {
         thickness: 1,
         space: 1,
       ),
-      drawerTheme: DrawerThemeData(
+      drawerTheme: const DrawerThemeData(
         backgroundColor: paper,
-        shape: const RoundedRectangleBorder(
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.horizontal(right: Radius.circular(24)),
         ),
       ),
-      bottomSheetTheme: BottomSheetThemeData(
+      bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: paper,
-        shape: const RoundedRectangleBorder(
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
       ),
     );
   }
 
-  // ── Typography ──────────────────────────────────────────────────────────────
   static TextTheme _buildTextTheme(TextTheme base) {
     return base.copyWith(
       displaySmall: GoogleFonts.playfairDisplay(

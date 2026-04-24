@@ -65,15 +65,15 @@ class CategoryModel {
   /// Generate consistent accent colors from category slug.
   static Color _colorFromSlug(String slug) {
     return switch (slug) {
-      'civil_status' => const Color(0xFF68775A),
-      'vehicles' => const Color(0xFFB45745),
-      'taxation' => const Color(0xFF843B31),
-      'residence' => const Color(0xFF5A6E77),
-      'passports_travel' => const Color(0xFF6B5A77),
-      'business' => const Color(0xFF6F625D),
-      'social_security' => const Color(0xFF4A7768),
-      'property' => const Color(0xFF7A6545),
-      _ => const Color(0xFF5D6F62),
+      'civil_status' => const Color(0xFF2F6FED),
+      'vehicles' => const Color(0xFF2563EB),
+      'taxation' => const Color(0xFF1E40AF),
+      'residence' => const Color(0xFF3B82F6),
+      'passports_travel' => const Color(0xFF0EA5E9),
+      'business' => const Color(0xFF1D4ED8),
+      'social_security' => const Color(0xFF0F4C81),
+      'property' => const Color(0xFF4F7CAC),
+      _ => const Color(0xFF2563EB),
     };
   }
 }

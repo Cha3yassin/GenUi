@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
 
 class StatusBadge extends StatelessWidget {
-  const StatusBadge({required this.label, this.color, this.icon, super.key});
+  const StatusBadge({
+    required this.label,
+    this.color,
+    this.icon,
+    this.backgroundAlpha = 0.12,
+    this.borderAlpha = 0.18,
+    super.key,
+  });
 
   final String label;
   final Color? color;
   final IconData? icon;
+  final double backgroundAlpha;
+  final double borderAlpha;
 
   @override
   Widget build(BuildContext context) {
@@ -13,9 +22,9 @@ class StatusBadge extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: badgeColor.withOpacity(0.12),
+        color: badgeColor.withValues(alpha: backgroundAlpha),
         borderRadius: BorderRadius.circular(99),
-        border: Border.all(color: badgeColor.withOpacity(0.18)),
+        border: Border.all(color: badgeColor.withValues(alpha: borderAlpha)),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),

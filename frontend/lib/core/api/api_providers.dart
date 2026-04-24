@@ -8,6 +8,10 @@ import '../../shared/models/office_model.dart';
 import '../../shared/models/procedure_model.dart';
 import '../../shared/models/procedure_summary_model.dart';
 import '../auth/auth_provider.dart';
+import '../genui/category_config.dart';
+import '../genui/genui_providers.dart';
+import '../genui/profile_config.dart';
+import '../genui/procedure_config.dart';
 import 'api_service.dart';
 import 'http_api_service.dart';
 import 'procedure_guide_adapter.dart';
@@ -17,8 +21,11 @@ final apiServiceProvider = Provider<ApiService>((ref) => HttpApiService());
 
 /// Categories — filtered by user role if authenticated.
 final categoriesProvider = FutureProvider<List<CategoryModel>>((ref) {
-  final role = ref.watch(userRoleProvider);
-  return ref.watch(apiServiceProvider).getCategories(role: role);
+  final profile = ref.watch(effectiveProfileProvider);
+  return ref
+      .watch(apiServiceProvider)
+      .getCategories(role: profileRole(profile))
+      .then((categories) => getCategoriesForProfile(profile, categories));
 });
 
 /// Procedure detail — passes user role for context-aware generation.
@@ -27,14 +34,19 @@ final procedureDetailProvider = FutureProvider.family<ProcedureModel, String>((
   ref,
   slug,
 ) async {
-  final role = ref.watch(userRoleProvider);
+  final profile = ref.watch(effectiveProfileProvider);
   final apiService = ref.watch(apiServiceProvider);
   final authState = ref.read(authProvider);
 
   // Pass auth token so the API service can save to history (fire-and-forget)
-  final token = authState.isAuthenticated ? authState.user!.firebaseToken : null;
+  final token =
+      authState.isAuthenticated ? authState.user!.firebaseToken : null;
 
-  return apiService.getProcedureDetail(slug, role: role, authToken: token);
+  return apiService.getProcedureDetail(
+    slug,
+    role: profileRole(profile),
+    authToken: token,
+  );
 });
 
 final categoryProceduresProvider =
@@ -76,6 +88,7 @@ final searchResultsProvider = FutureProvider<List<ProcedureSummaryModel>>((
   ref,
 ) async {
   final query = ref.watch(searchQueryProvider);
+  final profile = ref.watch(effectiveProfileProvider);
 
   if (query.trim().length < 2) {
     return [];
@@ -92,11 +105,13 @@ final searchResultsProvider = FutureProvider<List<ProcedureSummaryModel>>((
     throw Exception('Search cancelled due to debounce');
   }
 
-  return ref.watch(apiServiceProvider).searchProcedures(query);
+  final results = await ref.watch(apiServiceProvider).searchProcedures(query);
+  return searchProcedures(results, query, profile);
 });
 
 /// History summaries for the drawer (requires auth).
-final historySummariesProvider = FutureProvider<List<HistorySummary>>((ref) async {
+final historySummariesProvider =
+    FutureProvider<List<HistorySummary>>((ref) async {
   final authState = ref.watch(authProvider);
   if (!authState.isAuthenticated) return [];
 
@@ -113,7 +128,8 @@ final historyDetailProvider =
   }
 
   final token = authState.user!.firebaseToken;
-  final data = await ref.watch(apiServiceProvider).getHistoryDetail(token, historyId);
+  final data =
+      await ref.watch(apiServiceProvider).getHistoryDetail(token, historyId);
 
   // ai_response may come as a Map directly or as a JSON string
   final rawAiResponse = data['ai_response'];
