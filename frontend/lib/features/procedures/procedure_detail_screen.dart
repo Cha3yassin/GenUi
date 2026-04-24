@@ -8,6 +8,7 @@ import '../../core/api/language_utils.dart';
 import '../../core/constants/route_paths.dart';
 import '../../core/genui/genui_providers.dart';
 import '../../core/genui/procedure_page_composer.dart';
+import '../../core/genui/procedure_semantic_theme.dart';
 import '../../core/genui/profile_config.dart';
 import '../../core/locale/locale_provider.dart';
 import '../../core/utils/async_value_widget.dart';
@@ -41,6 +42,10 @@ class ProcedureDetailScreen extends ConsumerWidget {
           child: AsyncValueWidget<ProcedureModel>(
             value: detailValue,
             data: (procedure) {
+              final semanticTheme = inferProcedureSemanticTheme(
+                procedure,
+                locale: locale,
+              );
               final composedBlocks = ProcedurePageComposer.compose(
                 procedure: procedure,
                 profile: profile,
@@ -55,6 +60,7 @@ class ProcedureDetailScreen extends ConsumerWidget {
                     isArabic: isArabic,
                     profile: profile,
                     theme: profileTheme,
+                    semanticTheme: semanticTheme,
                   ),
                   const SizedBox(height: 18),
                   BlockRenderer(blocks: composedBlocks),
@@ -84,32 +90,47 @@ class _ProcedureHero extends StatelessWidget {
     required this.isArabic,
     required this.profile,
     required this.theme,
+    required this.semanticTheme,
   });
 
   final ProcedureModel procedure;
   final bool isArabic;
   final ProfileType profile;
   final ProfileThemeData theme;
+  final ProcedureSemanticTheme semanticTheme;
 
   @override
   Widget build(BuildContext context) {
     final isEnterprise = profile == ProfileType.enterprise;
+    final heroGradient = isEnterprise
+        ? <Color>[
+            const Color(0xFF172033),
+            semanticTheme.secondary,
+            theme.secondaryAccent,
+          ]
+        : <Color>[
+            Colors.white,
+            semanticTheme.surface,
+          ];
 
     return Container(
       decoration: BoxDecoration(
-        gradient: isEnterprise
-            ? LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: theme.heroGradient,
-              )
-            : null,
-        color: isEnterprise ? null : Colors.white,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: heroGradient,
+        ),
         borderRadius: BorderRadius.circular(isEnterprise ? 24 : 22),
-        border: Border.all(color: theme.borderTint),
+        border: Border.all(
+          color: isEnterprise
+              ? semanticTheme.accent.withValues(alpha: 0.24)
+              : theme.borderTint,
+        ),
         boxShadow: [
           BoxShadow(
-            color: theme.accent.withValues(alpha: isEnterprise ? 0.20 : 0.07),
+            color: semanticTheme.accent.withValues(
+              alpha: isEnterprise ? 0.24 : 0.08,
+            ),
             blurRadius: isEnterprise ? 28 : 18,
             offset: const Offset(0, 16),
           ),
@@ -128,12 +149,12 @@ class _ProcedureHero extends StatelessWidget {
                     width: 60,
                     height: 60,
                     decoration: BoxDecoration(
-                      color: theme.accent.withValues(alpha: 0.10),
+                      color: semanticTheme.accent.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(18),
                     ),
                     child: Icon(
-                      Icons.description_rounded,
-                      color: theme.accent,
+                      semanticTheme.icon,
+                      color: semanticTheme.accent,
                       size: 30,
                     ),
                   ),
@@ -144,12 +165,12 @@ class _ProcedureHero extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       StatusBadge(
-                        label: procedure.summary.categoryLabel,
+                        label: semanticTheme.label,
                         color: isEnterprise
                             ? theme.professionalAccent
-                            : theme.accent,
-                        backgroundAlpha: isEnterprise ? 0.12 : 0.08,
-                        borderAlpha: isEnterprise ? 0.18 : 0.14,
+                            : semanticTheme.accent,
+                        backgroundAlpha: isEnterprise ? 0.14 : 0.08,
+                        borderAlpha: isEnterprise ? 0.20 : 0.14,
                       ),
                       const SizedBox(height: 14),
                       Text(
@@ -167,9 +188,7 @@ class _ProcedureHero extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        isEnterprise
-                            ? 'Vue executive de la formalite, des couts et des interactions administratives.'
-                            : 'Resume clair de la demarche, du cout et du passage au guichet.',
+                        _heroSubtitle(isEnterprise, semanticTheme),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: isEnterprise
                                   ? theme.heroMutedForeground
@@ -186,7 +205,9 @@ class _ProcedureHero extends StatelessWidget {
                     width: 64,
                     height: 64,
                     decoration: BoxDecoration(
-                      color: theme.professionalAccent,
+                      color: isEnterprise
+                          ? theme.professionalAccent
+                          : semanticTheme.accent,
                       borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
@@ -198,7 +219,7 @@ class _ProcedureHero extends StatelessWidget {
                       ],
                     ),
                     child: Icon(
-                      Icons.business_center_rounded,
+                      semanticTheme.icon,
                       color: theme.accent,
                       size: 30,
                     ),
@@ -239,17 +260,17 @@ class _ProcedureHero extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _EnterpriseSignalTile(
-                      label: 'Conformite',
-                      value: 'Active',
+                      label: 'Mode GenUI',
+                      value: semanticTheme.label,
                       icon: Icons.verified_user_rounded,
-                      color: theme.successAccent,
+                      color: semanticTheme.accent,
                     ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: _EnterpriseSignalTile(
-                      label: 'Categorie',
-                      value: procedure.summary.categoryLabel,
+                      label: 'Composition',
+                      value: semanticTheme.summaryHint,
                       icon: Icons.domain_verification_rounded,
                       color: theme.professionalAccent,
                     ),
@@ -262,6 +283,38 @@ class _ProcedureHero extends StatelessWidget {
       ),
     );
   }
+}
+
+String _heroSubtitle(
+  bool isEnterprise,
+  ProcedureSemanticTheme semanticTheme,
+) {
+  if (isEnterprise) {
+    return switch (semanticTheme.id) {
+      'business_launch' =>
+        'Vue executive du lancement, de la conformite et des activations administratives.',
+      'legal_transfer' =>
+        'Pilotage du dossier contractuel, des pieces de cession et du passage administratif.',
+      'acquisition' =>
+        'Lecture orientee budget, fournisseur et mise en circulation de l acquisition.',
+      'renewal' =>
+        'Vue operationnelle du renouvellement, des depots et du retrait final.',
+      _ =>
+        'Vue executive de la formalite, des couts et des interactions administratives.',
+    };
+  }
+
+  return switch (semanticTheme.id) {
+    'legal_transfer' =>
+      'Resume clair du transfert, des pieces contractuelles et du bureau a contacter.',
+    'acquisition' =>
+      'Resume clair de l achat, des frais et des documents a preparer.',
+    'renewal' =>
+      'Resume clair de la mise a jour, des depots et du retrait final.',
+    'business_launch' =>
+      'Vue simplifiee de la creation, des couts et des etapes de lancement.',
+    _ => 'Resume clair de la demarche, du cout et du passage au guichet.',
+  };
 }
 
 class _SummaryPill extends StatelessWidget {

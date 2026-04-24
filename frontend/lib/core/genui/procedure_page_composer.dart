@@ -1,6 +1,7 @@
 import '../../core/api/language_utils.dart';
 import '../../renderer/models/ui_block_model.dart';
 import '../../shared/models/procedure_model.dart';
+import 'procedure_semantic_theme.dart';
 import 'profile_config.dart';
 
 class ProcedurePageComposer {
@@ -11,6 +12,10 @@ class ProcedurePageComposer {
     required ProfileType profile,
     required String locale,
   }) {
+    final semanticTheme = inferProcedureSemanticTheme(
+      procedure,
+      locale: locale,
+    );
     final sections = _collectSections(procedure.blocks);
     final warningSection = sections.cast<_SemanticSection?>().firstWhere(
           (section) =>
@@ -45,11 +50,16 @@ class ProcedurePageComposer {
         type: 'ai_overview',
         data: {
           'profile': profile.name,
+          'semanticId': semanticTheme.id,
+          'semanticLabel': semanticTheme.label,
+          'semanticIcon': semanticTheme.icon.codePoint,
+          'semanticLayout': semanticTheme.layoutStyle,
+          'semanticHint': semanticTheme.summaryHint,
           'title': _overviewTitle(locale, isEnterprise, isArabic),
           'summary': _overviewSummary(
-            procedure: procedure,
             isEnterprise: isEnterprise,
             isArabic: isArabic,
+            semanticTheme: semanticTheme,
           ),
           'metrics': [
             {
@@ -69,13 +79,12 @@ class ProcedurePageComposer {
             },
           ],
           'highlights': _buildHighlights(
-            procedure: procedure,
             warningSection: warningSection,
             stepperSection: stepperSection,
             checklistSection: checklistSection,
             costSection: costSection,
             officeSection: officeSection,
-            locale: locale,
+            semanticTheme: semanticTheme,
             isEnterprise: isEnterprise,
             isArabic: isArabic,
           ),
@@ -89,22 +98,27 @@ class ProcedurePageComposer {
       checklistSection: checklistSection,
       costSection: costSection,
       officeSection: officeSection,
-      locale: locale,
+      semanticTheme: semanticTheme,
       isEnterprise: isEnterprise,
       isArabic: isArabic,
     );
+
     if (actionCards.isNotEmpty) {
       composed.add(
         UiBlockModel(
           type: 'ai_action_grid',
           data: {
             'profile': profile.name,
+            'semanticId': semanticTheme.id,
+            'semanticLabel': semanticTheme.label,
+            'semanticIcon': semanticTheme.icon.codePoint,
+            'semanticLayout': semanticTheme.layoutStyle,
             'title': _actionGridTitle(locale, isEnterprise, isArabic),
             'subtitle': _actionGridSubtitle(
-              locale,
-              isEnterprise,
-              isArabic,
-              actionCards.length,
+              isEnterprise: isEnterprise,
+              isArabic: isArabic,
+              cardCount: actionCards.length,
+              semanticTheme: semanticTheme,
             ),
             'cards': actionCards,
           },
@@ -121,6 +135,7 @@ class ProcedurePageComposer {
       checklistSection: checklistSection,
       costSection: costSection,
       officeSection: officeSection,
+      semanticTheme: semanticTheme,
       isEnterprise: isEnterprise,
     );
 
@@ -163,27 +178,34 @@ class ProcedurePageComposer {
     required _SemanticSection? checklistSection,
     required _SemanticSection? costSection,
     required _SemanticSection? officeSection,
+    required ProcedureSemanticTheme semanticTheme,
     required bool isEnterprise,
   }) {
-    final ordered = <_SemanticSection>[];
+    final map = {
+      'workflow': stepperSection,
+      'documents': checklistSection,
+      'budget': costSection,
+      'office': officeSection,
+    };
 
-    if (isEnterprise) {
-      if (costSection != null) ordered.add(costSection);
-      if (stepperSection != null) ordered.add(stepperSection);
-      if (checklistSection != null) ordered.add(checklistSection);
-      if (officeSection != null) ordered.add(officeSection);
-      return ordered;
-    }
+    final order = switch (semanticTheme.layoutStyle) {
+      'featured_budget' => ['budget', 'workflow', 'documents', 'office'],
+      'dossier_first' => ['documents', 'workflow', 'budget', 'office'],
+      'compact_workflow' => ['workflow', 'documents', 'office', 'budget'],
+      'dashboard_launch' => ['workflow', 'budget', 'documents', 'office'],
+      _ => isEnterprise
+          ? ['budget', 'workflow', 'documents', 'office']
+          : ['workflow', 'documents', 'office', 'budget'],
+    };
 
-    if (stepperSection != null) ordered.add(stepperSection);
-    if (checklistSection != null) ordered.add(checklistSection);
-    if (officeSection != null) ordered.add(officeSection);
-    if (costSection != null) ordered.add(costSection);
-    return ordered;
+    return order.map((key) => map[key]).whereType<_SemanticSection>().toList();
   }
 
   static String _overviewTitle(
-      String locale, bool isEnterprise, bool isArabic) {
+    String locale,
+    bool isEnterprise,
+    bool isArabic,
+  ) {
     if (isArabic) {
       return isEnterprise ? 'ملخص تنفيذي' : 'نظرة سريعة';
     }
@@ -194,38 +216,37 @@ class ProcedurePageComposer {
   }
 
   static String _overviewSummary({
-    required ProcedureModel procedure,
     required bool isEnterprise,
     required bool isArabic,
+    required ProcedureSemanticTheme semanticTheme,
   }) {
     if (isArabic) {
       return isEnterprise
-          ? 'تم إنشاء هذا التخطيط تلقائيا حسب عدد الخطوات والوثائق والتكاليف ونقاط التفاعل الإدارية.'
-          : 'تم تنظيم هذه الصفحة تلقائيا لاظهار أهم ما تحتاجه قبل بدء الإجراء.';
+          ? 'تم إنشاء هذه الصفحة بشكل مختلف حسب نوع الإجراء: ${semanticTheme.label}.'
+          : 'تم تنظيم هذه الصفحة حسب طبيعة الإجراء: ${semanticTheme.label}.';
     }
 
     return isEnterprise
-        ? 'Cette page est composee dynamiquement selon les etapes, les justificatifs, les frais et les points de contact administratifs.'
-        : 'Cette page est composee automatiquement pour mettre en avant les informations utiles avant de commencer.';
+        ? 'Cette page adopte une composition ${semanticTheme.label.toLowerCase()} avec une logique de pilotage adaptee.'
+        : 'Cette page adopte une composition ${semanticTheme.label.toLowerCase()} pour mettre en avant les informations utiles.';
   }
 
   static List<String> _buildHighlights({
-    required ProcedureModel procedure,
     required _SemanticSection? warningSection,
     required _SemanticSection? stepperSection,
     required _SemanticSection? checklistSection,
     required _SemanticSection? costSection,
     required _SemanticSection? officeSection,
-    required String locale,
+    required ProcedureSemanticTheme semanticTheme,
     required bool isEnterprise,
     required bool isArabic,
   }) {
-    final highlights = <String>[];
+    final highlights = <String>[semanticTheme.label];
 
     if (warningSection != null) {
       highlights.add(
         isArabic
-            ? 'تنبيهات قبل البدء'
+            ? 'تنبيهات avant action'
             : isEnterprise
                 ? 'Points de vigilance detectes'
                 : 'Conseils avant demarrage',
@@ -237,7 +258,7 @@ class ProcedurePageComposer {
           (stepperSection.block.data['steps'] as List<dynamic>? ?? []).length;
       highlights.add(
         isArabic
-            ? '$steps خطوات organisees'
+            ? '$steps etapes'
             : '$steps ${steps > 1 ? 'etapes structurees' : 'etape structuree'}',
       );
     }
@@ -247,7 +268,7 @@ class ProcedurePageComposer {
           (checklistSection.block.data['items'] as List<dynamic>? ?? []).length;
       highlights.add(
         isArabic
-            ? '$items وثائق مطلوبة'
+            ? '$items documents'
             : '$items ${isEnterprise ? 'justificatifs a cadrer' : 'documents a prevoir'}',
       );
     }
@@ -257,7 +278,7 @@ class ProcedurePageComposer {
           (costSection.block.data['fees'] as List<dynamic>? ?? []).length;
       highlights.add(
         isArabic
-            ? '$fees lignes de frais'
+            ? '$fees frais'
             : '$fees ${isEnterprise ? 'postes de cout' : 'frais estimes'}',
       );
     }
@@ -265,18 +286,10 @@ class ProcedurePageComposer {
     if (officeSection != null) {
       highlights.add(
         isArabic
-            ? 'Point de contact administratif'
+            ? 'point de contact'
             : isEnterprise
                 ? 'Point de contact administratif'
                 : 'Guichet ou bureau a contacter',
-      );
-    }
-
-    if (highlights.isEmpty) {
-      highlights.add(
-        isArabic
-            ? 'Composition automatique de la page'
-            : 'Composition automatique de la page',
       );
     }
 
@@ -289,19 +302,18 @@ class ProcedurePageComposer {
     required _SemanticSection? checklistSection,
     required _SemanticSection? costSection,
     required _SemanticSection? officeSection,
-    required String locale,
+    required ProcedureSemanticTheme semanticTheme,
     required bool isEnterprise,
     required bool isArabic,
   }) {
-    final cards = <Map<String, dynamic>>[];
-
-    if (stepperSection != null) {
+    final workflowCard = () {
+      if (stepperSection == null) return null;
       final steps = (stepperSection.block.data['steps'] as List<dynamic>? ?? [])
           .cast<Map>();
       final firstTitle = steps.isNotEmpty
           ? steps.first['title']?.toString() ?? ''
           : procedure.summary.title;
-      cards.add({
+      return {
         'title': isArabic
             ? 'Parcours'
             : isEnterprise
@@ -315,45 +327,62 @@ class ProcedurePageComposer {
               ? '${steps.length} etapes'
               : '${steps.length} ${steps.length > 1 ? 'etapes' : 'etape'}',
         ],
-      });
-    }
+      };
+    }();
 
-    if (checklistSection != null) {
+    final documentsCard = () {
+      if (checklistSection == null) return null;
       final items =
           (checklistSection.block.data['items'] as List<dynamic>? ?? [])
               .take(3);
-      cards.add({
+      return {
         'title': isArabic
             ? 'Documents'
+            : semanticTheme.id == 'legal_transfer'
+                ? 'Dossier juridique'
+                : isEnterprise
+                    ? 'Documents'
+                    : 'Pieces utiles',
+        'subtitle': semanticTheme.id == 'legal_transfer'
+            ? 'Pieces contractuelles et justificatifs de cession'
             : isEnterprise
-                ? 'Documents'
-                : 'Pieces utiles',
-        'subtitle': isEnterprise
-            ? 'Elements a preparer pour le dossier'
-            : 'Pieces a reunir avant la visite',
+                ? 'Elements a preparer pour le dossier'
+                : 'Pieces a reunir avant la visite',
         'icon': 'folder',
         'tone': 'primary',
         'items': items.map((item) => item['title']?.toString() ?? '').toList(),
-      });
-    }
+      };
+    }();
 
-    if (costSection != null) {
+    final budgetCard = () {
+      if (costSection == null) return null;
       final fees =
           (costSection.block.data['fees'] as List<dynamic>? ?? []).take(3);
-      cards.add({
-        'title': isArabic ? 'Frais' : 'Budget',
-        'subtitle': isEnterprise
-            ? 'Vue des couts et postes administratifs'
-            : 'Montants et frais a prevoir',
+      return {
+        'title': semanticTheme.id == 'acquisition'
+            ? 'Budget d achat'
+            : isArabic
+                ? 'Frais'
+                : 'Budget',
+        'subtitle': semanticTheme.id == 'acquisition'
+            ? 'Montants d acquisition et de mise en circulation'
+            : isEnterprise
+                ? 'Vue des couts et postes administratifs'
+                : 'Montants et frais a prevoir',
         'icon': 'wallet',
         'tone': 'professional',
         'items': fees.map((item) => item['label']?.toString() ?? '').toList(),
-      });
-    }
+      };
+    }();
 
-    if (officeSection != null) {
-      cards.add({
-        'title': isArabic ? 'Administration' : 'Guichet',
+    final officeCard = () {
+      if (officeSection == null) return null;
+      return {
+        'title': semanticTheme.id == 'acquisition'
+            ? 'Fournisseur / guichet'
+            : isArabic
+                ? 'Administration'
+                : 'Guichet',
         'subtitle': officeSection.block.data['title']?.toString() ?? '',
         'icon': 'office',
         'tone': 'success',
@@ -362,10 +391,28 @@ class ProcedurePageComposer {
               ? 'Coordonnees et point de contact'
               : 'Adresse et informations utiles',
         ],
-      });
-    }
+      };
+    }();
 
-    return cards;
+    final map = {
+      'workflow': workflowCard,
+      'documents': documentsCard,
+      'budget': budgetCard,
+      'office': officeCard,
+    };
+
+    final order = switch (semanticTheme.layoutStyle) {
+      'featured_budget' => ['budget', 'office', 'documents', 'workflow'],
+      'dossier_first' => ['documents', 'workflow', 'budget', 'office'],
+      'compact_workflow' => ['workflow', 'documents', 'office', 'budget'],
+      'dashboard_launch' => ['workflow', 'budget', 'documents', 'office'],
+      _ => ['workflow', 'documents', 'budget', 'office'],
+    };
+
+    return order
+        .map((key) => map[key])
+        .whereType<Map<String, dynamic>>()
+        .toList();
   }
 
   static String _actionGridTitle(
@@ -382,18 +429,18 @@ class ProcedurePageComposer {
     return isEnterprise ? 'Panneau adaptatif' : 'Ce que la page a retenu';
   }
 
-  static String _actionGridSubtitle(
-    String locale,
-    bool isEnterprise,
-    bool isArabic,
-    int cardCount,
-  ) {
+  static String _actionGridSubtitle({
+    required bool isEnterprise,
+    required bool isArabic,
+    required int cardCount,
+    required ProcedureSemanticTheme semanticTheme,
+  }) {
     if (isArabic) {
-      return 'تم إنشاء $cardCount blocs selon le contenu disponible.';
+      return 'تم إنشاء $cardCount blocs selon le type ${semanticTheme.label}.';
     }
     return isEnterprise
-        ? '$cardCount blocs ont ete generes selon le contenu de la procedure.'
-        : '$cardCount blocs ont ete composes selon les informations disponibles.';
+        ? '$cardCount blocs generes avec une logique ${semanticTheme.label.toLowerCase()}.'
+        : '$cardCount blocs composes selon le type ${semanticTheme.label.toLowerCase()}.';
   }
 
   static String _metricLabel(String key, String locale, bool isArabic) {
