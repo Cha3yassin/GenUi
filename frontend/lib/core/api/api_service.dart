@@ -13,7 +13,7 @@ abstract class ApiService {
     String categoryId,
   );
 
-  Future<ProcedureModel> getProcedureDetail(String slug, {String? role});
+  Future<ProcedureModel> getProcedureDetail(String slug, {String? role, String? authToken});
 
   Future<List<OfficeModel>> getNearbyOffices({
     String? stepId,
@@ -26,4 +26,7 @@ abstract class ApiService {
 
   /// Fetch full history detail for re-rendering a past procedure.
   Future<Map<String, dynamic>> getHistoryDetail(String token, String historyId);
+
+  /// Save a GenUI procedure result to history (requires auth token).
+  Future<void> saveToHistory(String token, String userMessage, Map<String, dynamic> aiResponse);
 }

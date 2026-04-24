@@ -53,7 +53,7 @@ class MockApiService implements ApiService {
   }
 
   @override
-  Future<ProcedureModel> getProcedureDetail(String slug, {String? role}) async {
+  Future<ProcedureModel> getProcedureDetail(String slug, {String? role, String? authToken}) async {
     await Future<void>.delayed(_networkDelay);
     final detail =
         _procedureDetailsJson[slug] ?? _procedureDetailsJson.values.first;
@@ -80,6 +80,11 @@ class MockApiService implements ApiService {
   Future<Map<String, dynamic>> getHistoryDetail(String token, String historyId) async {
     await Future<void>.delayed(_networkDelay);
     return {};
+  }
+
+  @override
+  Future<void> saveToHistory(String token, String userMessage, Map<String, dynamic> aiResponse) async {
+    // No-op in mock
   }
 }
 

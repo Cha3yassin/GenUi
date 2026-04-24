@@ -189,7 +189,7 @@ class HttpApiService implements ApiService {
   // ── GenUI with polling ─────────────────────────────────────────────────────
 
   @override
-  Future<ProcedureModel> getProcedureDetail(String slug, {String? role}) async {
+  Future<ProcedureModel> getProcedureDetail(String slug, {String? role, String? authToken}) async {
     final message = slug.replaceAll('-', ' ');
     final language = LanguageUtils.preferredLanguageFor(message);
 
@@ -216,8 +216,13 @@ class HttpApiService implements ApiService {
           throw ApiException(
               decoded['message'] ?? 'Erreur IA', decoded['code']);
         }
+        final rawJson = decoded as Map<String, dynamic>;
+        // Save to history (fire-and-forget)
+        if (authToken != null) {
+          saveToHistory(authToken, message, rawJson);
+        }
         return ProcedureGuideAdapter.fromJson(
-          decoded as Map<String, dynamic>,
+          rawJson,
           slug: slug,
           language: language,
         );
@@ -227,7 +232,7 @@ class HttpApiService implements ApiService {
           decoded is Map<String, dynamic> &&
           decoded['task_id'] != null) {
         final taskId = decoded['task_id'] as String;
-        return _pollForResult(taskId, slug, language);
+        return _pollForResult(taskId, slug, language, authToken: authToken);
       }
 
       throw ApiException(
@@ -248,11 +253,13 @@ class HttpApiService implements ApiService {
   Future<ProcedureModel> _pollForResult(
     String taskId,
     String slug,
-    String language,
-  ) async {
+    String language, {
+    String? authToken,
+  }) async {
     final deadline = DateTime.now().add(AppConfig.maxPollDuration);
     final statusUri =
         Uri.parse('${AppConfig.apiV1}/gen-ui/tasks/$taskId/status');
+    final message = slug.replaceAll('-', ' ');
 
     while (DateTime.now().isBefore(deadline)) {
       await Future<void>.delayed(AppConfig.pollInterval);
@@ -271,6 +278,10 @@ class HttpApiService implements ApiService {
           if (result['type'] == 'error') {
             throw ApiException(
                 result['message'] ?? 'Erreur IA', result['code']);
+          }
+          // Save to history (fire-and-forget)
+          if (authToken != null) {
+            saveToHistory(authToken, message, result);
           }
           return ProcedureGuideAdapter.fromJson(
             result,
@@ -349,6 +360,39 @@ class HttpApiService implements ApiService {
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException('Erreur lors du chargement du détail.');
+    }
+  }
+
+  // ── Save to History ────────────────────────────────────────────────────────
+
+  @override
+  Future<void> saveToHistory(
+    String token,
+    String userMessage,
+    Map<String, dynamic> aiResponse,
+  ) async {
+    try {
+      final uri = Uri.parse('${AppConfig.apiV1}/history/me/save');
+      final response = await _client
+          .post(
+            uri,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+            body: jsonEncode({
+              'user_message': userMessage,
+              'ai_response': aiResponse,
+            }),
+          )
+          .timeout(AppConfig.requestTimeout);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return; // Success
+      }
+      // Non-critical — don't throw, just log silently
+    } catch (_) {
+      // History saving should never block the user experience
     }
   }
 }

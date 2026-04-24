@@ -132,6 +132,59 @@ class AppStrings {
       'en': 'Retry',
       'ar': 'إعادة المحاولة',
     },
+    // ── Enterprise popular prompts ──────────────────────────────────
+    'tax_registration': {
+      'fr': 'Déclaration fiscale',
+      'en': 'Tax registration',
+      'ar': 'التسجيل الضريبي',
+    },
+    'business_bank_account': {
+      'fr': 'Compte bancaire pro',
+      'en': 'Business bank account',
+      'ar': 'حساب بنكي تجاري',
+    },
+    'commercial_register': {
+      'fr': 'Registre de commerce',
+      'en': 'Commercial register',
+      'ar': 'السجل التجاري',
+    },
+    'rne_registration': {
+      'fr': 'Inscription RNE',
+      'en': 'RNE registration',
+      'ar': 'تسجيل في السجل الوطني',
+    },
+    // ── Individual procedure names ──────────────────────────────────
+    'marriage_certificate': {
+      'fr': 'Acte de mariage',
+      'en': 'Marriage certificate',
+      'ar': 'عقد زواج',
+    },
+    'national_id_card': {
+      'fr': 'Carte d\'identité (CIN)',
+      'en': 'National ID card',
+      'ar': 'بطاقة التعريف الوطنية',
+    },
+    'birth_certificate': {
+      'fr': 'Acte de naissance',
+      'en': 'Birth certificate',
+      'ar': 'شهادة الميلاد',
+    },
+    'driving_license': {
+      'fr': 'Permis de conduire',
+      'en': 'Driving license',
+      'ar': 'رخصة القيادة',
+    },
+    // ── Enterprise section title ────────────────────────────────────
+    'popular_enterprise': {
+      'fr': 'Populaires pour entreprises',
+      'en': 'Popular for businesses',
+      'ar': 'الأكثر شيوعاً للشركات',
+    },
+    'popular_enterprise_subtitle': {
+      'fr': 'Démarches fréquentes pour les entreprises.',
+      'en': 'Common procedures businesses are looking for.',
+      'ar': 'الإجراءات الشائعة التي تبحث عنها المؤسسات.',
+    },
   };
 
   /// Get a translated string by key and locale.

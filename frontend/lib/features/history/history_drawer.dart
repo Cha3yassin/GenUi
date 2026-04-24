@@ -20,6 +20,9 @@ class HistoryDrawer extends ConsumerWidget {
     final authState = ref.watch(authProvider);
     final theme = Theme.of(context);
 
+    // Invalidate history cache each time drawer opens — ensures fresh data
+    ref.invalidate(historySummariesProvider);
+
     return Drawer(
       child: SafeArea(
         child: Column(

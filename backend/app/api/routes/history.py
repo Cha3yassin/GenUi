@@ -11,6 +11,7 @@ import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.logging import get_logger
@@ -24,7 +25,7 @@ from app.schemas.responses import (
     HistorySummaryResponse,
 )
 from app.services.auth_service import get_user_by_firebase_uid
-from app.services.history_service import get_user_history, get_history_by_id
+from app.services.history_service import get_user_history, get_history_by_id, save_chat_message
 
 logger = get_logger(__name__)
 
@@ -90,6 +91,62 @@ async def get_my_history_summaries(
         )
 
     return HistorySummaryResponse(items=items, total=total)
+
+
+# ── Save a GenUI result to history ────────────────────────────────────────────
+
+class _SaveHistoryRequest(BaseModel):
+    """Payload for saving a GenUI result to history."""
+    user_message: str
+    ai_response: dict
+
+@router.post(
+    "/me/save",
+    status_code=status.HTTP_201_CREATED,
+    summary="Save a GenUI procedure to history",
+    description=(
+        "Called by the Flutter frontend after a successful GenUI procedure "
+        "generation. Saves the user_message and ai_response JSON to the "
+        "chat_history table for the authenticated user."
+    ),
+)
+async def save_to_history(
+    body: _SaveHistoryRequest,
+    current_user: CurrentUser,
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    """
+    Persist a GenUI exchange to the user's history.
+    This is separate from /gen-ui/search because GenUI is public
+    but history saving requires authentication.
+    """
+    user = await get_user_by_firebase_uid(db, current_user.uid)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found. Please login first.",
+        )
+
+    try:
+        entry = await save_chat_message(
+            db=db,
+            user_id=user.id,
+            user_message=body.user_message,
+            ai_response=body.ai_response,
+        )
+        await db.commit()
+        logger.info(
+            "GenUI result saved to history",
+            user_id=str(user.id),
+            history_id=str(entry.id),
+        )
+        return {"status": "saved", "history_id": str(entry.id)}
+    except Exception as exc:
+        logger.error("Failed to save to history", error=str(exc))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to save to history.",
+        )
 
 
 # ── Full detail for re-rendering a past procedure ─────────────────────────────

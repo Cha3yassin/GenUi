@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../shared/models/category_model.dart';
@@ -20,12 +22,19 @@ final categoriesProvider = FutureProvider<List<CategoryModel>>((ref) {
 });
 
 /// Procedure detail — passes user role for context-aware generation.
+/// When authenticated, the auth token is passed so the result is auto-saved to history.
 final procedureDetailProvider = FutureProvider.family<ProcedureModel, String>((
   ref,
   slug,
-) {
+) async {
   final role = ref.watch(userRoleProvider);
-  return ref.watch(apiServiceProvider).getProcedureDetail(slug, role: role);
+  final apiService = ref.watch(apiServiceProvider);
+  final authState = ref.read(authProvider);
+
+  // Pass auth token so the API service can save to history (fire-and-forget)
+  final token = authState.isAuthenticated ? authState.user!.firebaseToken : null;
+
+  return apiService.getProcedureDetail(slug, role: role, authToken: token);
 });
 
 final categoryProceduresProvider =
@@ -105,7 +114,17 @@ final historyDetailProvider =
 
   final token = authState.user!.firebaseToken;
   final data = await ref.watch(apiServiceProvider).getHistoryDetail(token, historyId);
-  final aiResponse = data['ai_response'] as Map<String, dynamic>;
+
+  // ai_response may come as a Map directly or as a JSON string
+  final rawAiResponse = data['ai_response'];
+  final Map<String, dynamic> aiResponse;
+  if (rawAiResponse is Map<String, dynamic>) {
+    aiResponse = rawAiResponse;
+  } else if (rawAiResponse is String) {
+    aiResponse = (jsonDecode(rawAiResponse) as Map<String, dynamic>);
+  } else {
+    throw Exception('Invalid ai_response format');
+  }
 
   return ProcedureGuideAdapter.fromJson(
     aiResponse,

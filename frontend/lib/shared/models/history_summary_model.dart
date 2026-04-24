@@ -12,7 +12,7 @@ class HistorySummary {
 
   factory HistorySummary.fromJson(Map<String, dynamic> json) {
     return HistorySummary(
-      id: json['id'] as String,
+      id: json['id'].toString(),
       title: json['title'] as String? ?? 'Untitled',
       createdAt: DateTime.parse(json['created_at'] as String),
     );

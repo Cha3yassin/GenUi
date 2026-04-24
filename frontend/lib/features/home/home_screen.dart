@@ -25,6 +25,7 @@ class HomeScreen extends ConsumerWidget {
     final categoriesValue = ref.watch(categoriesProvider);
     final locale = ref.watch(localeProvider);
     final isRtl = locale == 'ar';
+    final role = ref.watch(userRoleProvider);
 
     return Directionality(
       textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
@@ -51,6 +52,10 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 32),
 
+                // ── Popular chips (role-aware) ──────────────────────────
+                _PopularSection(locale: locale, role: role),
+                const SizedBox(height: 32),
+
                 // ── Categories ──────────────────────────────────────────
                 SectionHeader(
                   title: AppStrings.get('browse_by_category', locale),
@@ -64,38 +69,6 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 36),
 
-                // ── Popular chips ───────────────────────────────────────
-                SectionHeader(
-                  title: AppStrings.get('popular_this_week', locale),
-                  subtitle: AppStrings.get('popular_subtitle', locale),
-                ),
-                const SizedBox(height: 14),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: [
-                    SahilChipButton(
-                      label: AppStrings.get('buy_car', locale),
-                      icon: Icons.directions_car_rounded,
-                      onPressed: () =>
-                          context.push(RoutePaths.procedure('buy-used-car')),
-                    ),
-                    SahilChipButton(
-                      label: AppStrings.get('passport_renewal', locale),
-                      icon: Icons.badge_rounded,
-                      onPressed: () => context
-                          .push(RoutePaths.procedure('passport-renewal')),
-                    ),
-                    SahilChipButton(
-                      label: AppStrings.get('register_company', locale),
-                      icon: Icons.business_center_rounded,
-                      onPressed: () => context
-                          .push(RoutePaths.procedure('register-company')),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 32),
-
                 // ── Trust card ──────────────────────────────────────────
                 _TrustCard(locale: locale),
               ],
@@ -104,6 +77,99 @@ class HomeScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+// ── Role-aware popular prompts ────────────────────────────────────────────────
+
+class _PopularSection extends StatelessWidget {
+  const _PopularSection({required this.locale, required this.role});
+
+  final String locale;
+  final String? role;
+
+  @override
+  Widget build(BuildContext context) {
+    final isEnterprise = role == 'enterprise';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionHeader(
+          title: isEnterprise
+              ? AppStrings.get('popular_enterprise', locale)
+              : AppStrings.get('popular_this_week', locale),
+          subtitle: isEnterprise
+              ? AppStrings.get('popular_enterprise_subtitle', locale)
+              : AppStrings.get('popular_subtitle', locale),
+        ),
+        const SizedBox(height: 14),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: isEnterprise
+              ? _enterpriseChips(context, locale)
+              : _individualChips(context, locale),
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _individualChips(BuildContext context, String locale) {
+    return [
+      SahilChipButton(
+        label: AppStrings.get('buy_car', locale),
+        icon: Icons.directions_car_rounded,
+        onPressed: () => context.push(RoutePaths.procedure('buy-used-car')),
+      ),
+      SahilChipButton(
+        label: AppStrings.get('passport_renewal', locale),
+        icon: Icons.badge_rounded,
+        onPressed: () =>
+            context.push(RoutePaths.procedure('passport-renewal')),
+      ),
+      SahilChipButton(
+        label: AppStrings.get('marriage_certificate', locale),
+        icon: Icons.favorite_rounded,
+        onPressed: () =>
+            context.push(RoutePaths.procedure('marriage-certificate')),
+      ),
+      SahilChipButton(
+        label: AppStrings.get('national_id_card', locale),
+        icon: Icons.credit_card_rounded,
+        onPressed: () =>
+            context.push(RoutePaths.procedure('national-id-card-cin')),
+      ),
+    ];
+  }
+
+  List<Widget> _enterpriseChips(BuildContext context, String locale) {
+    return [
+      SahilChipButton(
+        label: AppStrings.get('register_company', locale),
+        icon: Icons.business_center_rounded,
+        onPressed: () => context
+            .push(RoutePaths.procedure('register-company-sarl-tunisia')),
+      ),
+      SahilChipButton(
+        label: AppStrings.get('tax_registration', locale),
+        icon: Icons.calculate_rounded,
+        onPressed: () =>
+            context.push(RoutePaths.procedure('tax-declaration-tunisia')),
+      ),
+      SahilChipButton(
+        label: AppStrings.get('commercial_register', locale),
+        icon: Icons.receipt_long_rounded,
+        onPressed: () => context
+            .push(RoutePaths.procedure('commercial-register-extract')),
+      ),
+      SahilChipButton(
+        label: AppStrings.get('rne_registration', locale),
+        icon: Icons.app_registration_rounded,
+        onPressed: () =>
+            context.push(RoutePaths.procedure('rne-registration-tunisia')),
+      ),
+    ];
   }
 }
 
@@ -331,9 +397,9 @@ class _CategoryGrid extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 0.95,
+        mainAxisSpacing: 10,
+        crossAxisSpacing: 10,
+        childAspectRatio: 1.15,
       ),
       itemCount: categories.length,
       itemBuilder: (context, index) {
@@ -343,6 +409,8 @@ class _CategoryGrid extends StatelessWidget {
           locale: locale,
           onTap: () =>
               context.push(RoutePaths.categoryProcedures(category.id)),
+          onProcedureTap: (slug) =>
+              context.push(RoutePaths.procedure(slug)),
         );
       },
     );
