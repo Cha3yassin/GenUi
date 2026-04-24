@@ -18,7 +18,6 @@ class ProcedureDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // If historyId is provided, load from history; otherwise generate live
     final detailValue = historyId != null && historyId!.isNotEmpty
         ? ref.watch(historyDetailProvider(historyId!))
         : ref.watch(procedureDetailProvider(slug));
@@ -28,7 +27,7 @@ class ProcedureDetailScreen extends ConsumerWidget {
     return Directionality(
       textDirection: textDirection,
       child: Scaffold(
-        appBar: AppBar(title: Text(isArabic ? 'الإجراء' : 'Procedure')),
+        appBar: AppBar(title: Text(isArabic ? 'Ø§Ù„Ø¥Ø¬Ø±Ø§Ø¡' : 'Procedure')),
         body: SafeArea(
           child: AsyncValueWidget<ProcedureModel>(
             value: detailValue,
@@ -44,7 +43,10 @@ class ProcedureDetailScreen extends ConsumerWidget {
                   ),
                   icon: const Icon(Icons.near_me_rounded),
                   label: Text(
-                      isArabic ? 'اعثر على أقرب مكتب' : 'Find nearest office'),
+                    isArabic
+                        ? 'Ø§Ø¹Ø«Ø± Ø¹Ù„Ù‰ Ø£Ù‚Ø±Ø¨ Ù…ÙƒØªØ¨'
+                        : 'Find nearest office',
+                  ),
                 ),
               ],
             ),
@@ -63,9 +65,6 @@ class _ProcedureHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final percent =
-        procedure.totalSteps > 0 ? (procedure.progress * 100).round() : 100;
-
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -77,11 +76,6 @@ class _ProcedureHero extends StatelessWidget {
             Text(
               procedure.summary.title,
               style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              procedure.summary.summary,
-              style: Theme.of(context).textTheme.bodyLarge,
             ),
             const SizedBox(height: 18),
             Wrap(
@@ -99,49 +93,8 @@ class _ProcedureHero extends StatelessWidget {
                 _SummaryPill(
                   icon: Icons.account_balance_rounded,
                   label: isArabic
-                      ? '${procedure.summary.officesToVisit} مكاتب'
+                      ? '${procedure.summary.officesToVisit} Ù…ÙƒØ§ØªØ¨'
                       : '${procedure.summary.officesToVisit} offices',
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        isArabic
-                            ? 'الخطوة ${procedure.currentStep} من ${procedure.totalSteps} - $percent% مكتمل'
-                            : 'Step ${procedure.currentStep} of ${procedure.totalSteps} - $percent% done',
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      const SizedBox(height: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(99),
-                        child: LinearProgressIndicator(
-                          value: procedure.progress,
-                          minHeight: 9,
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.primary.withOpacity(0.12),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                SizedBox(
-                  width: 56,
-                  height: 56,
-                  child: CircularProgressIndicator(
-                    value: procedure.progress,
-                    strokeWidth: 6,
-                    backgroundColor: Theme.of(
-                      context,
-                    ).colorScheme.primary.withOpacity(0.12),
-                  ),
                 ),
               ],
             ),
@@ -163,7 +116,7 @@ class _SummaryPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(99),
       ),
       child: Row(

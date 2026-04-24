@@ -80,10 +80,7 @@ class ProcedureGuideAdapter {
       blocks.add(
         UiBlockModel(
           type: 'stepper',
-          data: {
-            'steps': stepperSteps,
-            'currentLabel': labels.current,
-          },
+          data: {'steps': stepperSteps},
         ),
       );
     }

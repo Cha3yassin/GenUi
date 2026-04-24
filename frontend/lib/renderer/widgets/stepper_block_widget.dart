@@ -14,7 +14,6 @@ class StepperBlockWidget extends StatelessWidget {
           (item) => ProcedureStepModel.fromJson(item as Map<String, dynamic>),
         )
         .toList();
-    final currentLabel = data['currentLabel'] as String? ?? 'Current';
 
     return Card(
       child: Padding(
@@ -26,7 +25,6 @@ class StepperBlockWidget extends StatelessWidget {
                 step: steps[index],
                 index: index,
                 isLast: index == steps.length - 1,
-                currentLabel: currentLabel,
               ),
           ],
         ),
@@ -40,13 +38,11 @@ class _StepRow extends StatelessWidget {
     required this.step,
     required this.index,
     required this.isLast,
-    required this.currentLabel,
   });
 
   final ProcedureStepModel step;
   final int index;
   final bool isLast;
-  final String currentLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +64,7 @@ class _StepRow extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: step.isCompleted
                       ? colorScheme.primary
-                      : activeColor.withOpacity(0.12),
+                      : activeColor.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                   border: Border.all(color: activeColor, width: 1.5),
                 ),
@@ -92,7 +88,7 @@ class _StepRow extends StatelessWidget {
                   child: Container(
                     width: 2,
                     margin: const EdgeInsets.symmetric(vertical: 6),
-                    color: activeColor.withOpacity(0.24),
+                    color: activeColor.withValues(alpha: 0.24),
                   ),
                 ),
             ],
@@ -104,36 +100,9 @@ class _StepRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          step.title,
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
-                      ),
-                      if (step.isCurrent)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: colorScheme.primary.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(99),
-                          ),
-                          child: Text(
-                            currentLabel,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelLarge
-                                ?.copyWith(
-                                  color: colorScheme.primary,
-                                  fontSize: 11,
-                                ),
-                          ),
-                        ),
-                    ],
+                  Text(
+                    step.title,
+                    style: Theme.of(context).textTheme.titleSmall,
                   ),
                   const SizedBox(height: 6),
                   Text(

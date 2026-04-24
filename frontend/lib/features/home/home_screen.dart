@@ -125,8 +125,7 @@ class _PopularSection extends StatelessWidget {
       SahilChipButton(
         label: AppStrings.get('passport_renewal', locale),
         icon: Icons.badge_rounded,
-        onPressed: () =>
-            context.push(RoutePaths.procedure('passport-renewal')),
+        onPressed: () => context.push(RoutePaths.procedure('passport-renewal')),
       ),
       SahilChipButton(
         label: AppStrings.get('marriage_certificate', locale),
@@ -148,8 +147,8 @@ class _PopularSection extends StatelessWidget {
       SahilChipButton(
         label: AppStrings.get('register_company', locale),
         icon: Icons.business_center_rounded,
-        onPressed: () => context
-            .push(RoutePaths.procedure('register-company-sarl-tunisia')),
+        onPressed: () =>
+            context.push(RoutePaths.procedure('register-company-sarl-tunisia')),
       ),
       SahilChipButton(
         label: AppStrings.get('tax_registration', locale),
@@ -160,8 +159,8 @@ class _PopularSection extends StatelessWidget {
       SahilChipButton(
         label: AppStrings.get('commercial_register', locale),
         icon: Icons.receipt_long_rounded,
-        onPressed: () => context
-            .push(RoutePaths.procedure('commercial-register-extract')),
+        onPressed: () =>
+            context.push(RoutePaths.procedure('commercial-register-extract')),
       ),
       SahilChipButton(
         label: AppStrings.get('rne_registration', locale),
@@ -224,8 +223,7 @@ class _HomeHeader extends ConsumerWidget {
               onPressed: () => context.push(RoutePaths.login),
               style: TextButton.styleFrom(
                 foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14),
+                padding: const EdgeInsets.symmetric(horizontal: 14),
                 textStyle: GoogleFonts.dmSans(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
@@ -252,9 +250,9 @@ class _UserAvatar extends StatelessWidget {
       width: 36,
       height: 36,
       decoration: BoxDecoration(
-        color: AppTheme.terracotta.withOpacity(0.1),
+        color: AppTheme.terracotta.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.terracotta.withOpacity(0.2)),
+        border: Border.all(color: AppTheme.terracotta.withValues(alpha: 0.2)),
       ),
       child: Center(
         child: Text(
@@ -373,7 +371,9 @@ class _LangChip extends StatelessWidget {
           style: GoogleFonts.dmSans(
             fontSize: 11,
             fontWeight: FontWeight.w800,
-            color: isActive ? Colors.white : AppTheme.mutedInk.withOpacity(0.5),
+            color: isActive
+                ? Colors.white
+                : AppTheme.mutedInk.withValues(alpha: 0.5),
             letterSpacing: 0.5,
           ),
         ),
@@ -392,25 +392,35 @@ class _CategoryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 10,
-        crossAxisSpacing: 10,
-        childAspectRatio: 1.15,
-      ),
-      itemCount: categories.length,
-      itemBuilder: (context, index) {
-        final category = categories[index];
-        return CategoryCard(
-          category: category,
-          locale: locale,
-          onTap: () =>
-              context.push(RoutePaths.categoryProcedures(category.id)),
-          onProcedureTap: (slug) =>
-              context.push(RoutePaths.procedure(slug)),
+    const spacing = 10.0;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = constraints.maxWidth >= 720
+            ? 3
+            : constraints.maxWidth >= 360
+                ? 2
+                : 1;
+        final itemWidth =
+            (constraints.maxWidth - (spacing * (crossAxisCount - 1))) /
+                crossAxisCount;
+
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: categories.map((category) {
+            return SizedBox(
+              width: itemWidth,
+              child: CategoryCard(
+                category: category,
+                locale: locale,
+                onTap: () =>
+                    context.push(RoutePaths.categoryProcedures(category.id)),
+                onProcedureTap: (slug) =>
+                    context.push(RoutePaths.procedure(slug)),
+              ),
+            );
+          }).toList(),
         );
       },
     );
@@ -440,7 +450,7 @@ class _TrustCard extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: AppTheme.olive.withOpacity(0.1),
+              color: AppTheme.olive.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Icon(
