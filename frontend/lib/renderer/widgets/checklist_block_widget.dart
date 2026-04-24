@@ -2,14 +2,21 @@ import 'package:flutter/material.dart';
 
 import '../../shared/models/document_model.dart';
 
-class ChecklistBlockWidget extends StatelessWidget {
+class ChecklistBlockWidget extends StatefulWidget {
   const ChecklistBlockWidget({required this.data, super.key});
 
   final Map<String, dynamic> data;
 
   @override
+  State<ChecklistBlockWidget> createState() => _ChecklistBlockWidgetState();
+}
+
+class _ChecklistBlockWidgetState extends State<ChecklistBlockWidget> {
+  final Set<int> _checkedIndexes = <int>{};
+
+  @override
   Widget build(BuildContext context) {
-    final items = (data['items'] as List<dynamic>? ?? [])
+    final items = (widget.data['items'] as List<dynamic>? ?? [])
         .map((item) => DocumentModel.fromJson(item as Map<String, dynamic>))
         .toList();
 
@@ -17,7 +24,22 @@ class ChecklistBlockWidget extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(
-          children: [for (final item in items) _ChecklistItem(document: item)],
+          children: [
+            for (var i = 0; i < items.length; i++)
+              _ChecklistItem(
+                document: items[i],
+                checked: _checkedIndexes.contains(i),
+                onChanged: (value) {
+                  setState(() {
+                    if (value == true) {
+                      _checkedIndexes.add(i);
+                    } else {
+                      _checkedIndexes.remove(i);
+                    }
+                  });
+                },
+              ),
+          ],
         ),
       ),
     );
@@ -25,9 +47,15 @@ class ChecklistBlockWidget extends StatelessWidget {
 }
 
 class _ChecklistItem extends StatelessWidget {
-  const _ChecklistItem({required this.document});
+  const _ChecklistItem({
+    required this.document,
+    required this.checked,
+    required this.onChanged,
+  });
 
   final DocumentModel document;
+  final bool checked;
+  final ValueChanged<bool?> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -36,24 +64,15 @@ class _ChecklistItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 26,
-            height: 26,
-            decoration: BoxDecoration(
-              color: Theme.of(
-                context,
-              ).colorScheme.secondary.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: Theme.of(
-                  context,
-                ).colorScheme.secondary.withOpacity(0.24),
+          SizedBox(
+            width: 28,
+            height: 28,
+            child: Checkbox(
+              value: checked,
+              onChanged: onChanged,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
               ),
-            ),
-            child: Icon(
-              Icons.check_rounded,
-              size: 17,
-              color: Theme.of(context).colorScheme.secondary,
             ),
           ),
           const SizedBox(width: 12),
@@ -63,7 +82,10 @@ class _ChecklistItem extends StatelessWidget {
               children: [
                 Text(
                   document.title,
-                  style: Theme.of(context).textTheme.titleSmall,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        decoration:
+                            checked ? TextDecoration.lineThrough : null,
+                      ),
                 ),
                 if (document.note != null) ...[
                   const SizedBox(height: 4),

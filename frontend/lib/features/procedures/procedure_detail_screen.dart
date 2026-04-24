@@ -1,31 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_providers.dart';
 import '../../core/constants/route_paths.dart';
 import '../../core/genui/genui_providers.dart';
 import '../../core/genui/procedure_page_composer.dart';
-import '../../core/genui/procedure_semantic_theme.dart';
 import '../../core/genui/profile_config.dart';
 import '../../core/locale/locale_provider.dart';
 import '../../core/utils/async_value_widget.dart';
 import '../../renderer/block_renderer.dart';
 import '../../shared/models/procedure_model.dart';
-import '../../shared/widgets/status_badge.dart';
 
-class ProcedureDetailScreen extends ConsumerWidget {
+class ProcedureDetailScreen extends ConsumerStatefulWidget {
   const ProcedureDetailScreen({required this.slug, this.historyId, super.key});
 
   final String slug;
   final String? historyId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final detailValue = historyId != null && historyId!.isNotEmpty
-        ? ref.watch(historyDetailProvider(historyId!))
-        : ref.watch(procedureDetailProvider(slug));
+  ConsumerState<ProcedureDetailScreen> createState() =>
+      _ProcedureDetailScreenState();
+}
+
+class _ProcedureDetailScreenState extends ConsumerState<ProcedureDetailScreen> {
+  bool _simplified = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final detailValue = widget.historyId != null && widget.historyId!.isNotEmpty
+        ? ref.watch(historyDetailProvider(widget.historyId!))
+        : ref.watch(procedureDetailProvider(widget.slug));
     final profile = ref.watch(effectiveProfileProvider);
     final profileTheme = getThemeByProfile(profile);
     final locale = ref.watch(localeProvider);
@@ -45,14 +50,11 @@ class ProcedureDetailScreen extends ConsumerWidget {
           child: AsyncValueWidget<ProcedureModel>(
             value: detailValue,
             data: (procedure) {
-              final semanticTheme = inferProcedureSemanticTheme(
-                procedure,
-                locale: locale,
-              );
               final composedBlocks = ProcedurePageComposer.compose(
                 procedure: procedure,
                 profile: profile,
                 locale: locale,
+                simplified: _simplified,
               );
 
               return ListView(
@@ -60,11 +62,13 @@ class ProcedureDetailScreen extends ConsumerWidget {
                 children: [
                   _ProcedureHero(
                     procedure: procedure,
-                    isArabic: isArabic,
                     locale: locale,
-                    profile: profile,
-                    theme: profileTheme,
-                    semanticTheme: semanticTheme,
+                    simplified: _simplified,
+                    onToggleSimplified: () {
+                      setState(() {
+                        _simplified = !_simplified;
+                      });
+                    },
                   ),
                   const SizedBox(height: 18),
                   BlockRenderer(blocks: composedBlocks),
@@ -95,153 +99,52 @@ class ProcedureDetailScreen extends ConsumerWidget {
 class _ProcedureHero extends StatelessWidget {
   const _ProcedureHero({
     required this.procedure,
-    required this.isArabic,
     required this.locale,
-    required this.profile,
-    required this.theme,
-    required this.semanticTheme,
+    required this.simplified,
+    required this.onToggleSimplified,
   });
 
   final ProcedureModel procedure;
-  final bool isArabic;
   final String locale;
-  final ProfileType profile;
-  final ProfileThemeData theme;
-  final ProcedureSemanticTheme semanticTheme;
+  final bool simplified;
+  final VoidCallback onToggleSimplified;
 
   @override
   Widget build(BuildContext context) {
-    final isEnterprise = profile == ProfileType.enterprise;
-    final heroGradient = isEnterprise
-        ? <Color>[
-            const Color(0xFF172033),
-            semanticTheme.secondary,
-            theme.secondaryAccent,
-          ]
-        : <Color>[
-            Colors.white,
-            semanticTheme.surface,
-          ];
+    final isArabic = locale == 'ar';
+    final stepsCount = procedure.totalSteps;
+    final offices = procedure.summary.officesToVisit;
 
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: heroGradient,
-        ),
-        borderRadius: BorderRadius.circular(isEnterprise ? 24 : 22),
-        border: Border.all(
-          color: isEnterprise
-              ? semanticTheme.accent.withValues(alpha: 0.24)
-              : theme.borderTint,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: semanticTheme.accent.withValues(
-              alpha: isEnterprise ? 0.24 : 0.08,
-            ),
-            blurRadius: isEnterprise ? 28 : 18,
-            offset: const Offset(0, 16),
-          ),
-        ],
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFD7DEE8)),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(22),
+        padding: const EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (!isEnterprise) ...[
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: semanticTheme.accent.withValues(alpha: 0.10),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: Icon(
-                      semanticTheme.icon,
-                      color: semanticTheme.accent,
-                      size: 30,
-                    ),
+            Text(
+              procedure.summary.title,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF101828),
                   ),
-                  const SizedBox(width: 16),
-                ],
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      StatusBadge(
-                        label: semanticTheme.label,
-                        color: isEnterprise
-                            ? theme.professionalAccent
-                            : semanticTheme.accent,
-                        backgroundAlpha: isEnterprise ? 0.14 : 0.08,
-                        borderAlpha: isEnterprise ? 0.20 : 0.14,
-                      ),
-                      const SizedBox(height: 14),
-                      Text(
-                        procedure.summary.title,
-                        style: (isEnterprise
-                                ? Theme.of(context).textTheme.headlineMedium
-                                : GoogleFonts.playfairDisplayTextTheme(
-                                    Theme.of(context).textTheme,
-                                  ).headlineMedium)
-                            ?.copyWith(
-                          color: isEnterprise ? theme.heroForeground : null,
-                          fontSize: isEnterprise ? 30 : 26,
-                          height: 1.10,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        _heroSubtitle(
-                          isEnterprise,
-                          semanticTheme,
-                          locale: locale,
-                        ),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: isEnterprise
-                                  ? theme.heroMutedForeground
-                                  : const Color(0xFF60759A),
-                              height: 1.45,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (isEnterprise) ...[
-                  const SizedBox(width: 16),
-                  Container(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      color: isEnterprise
-                          ? theme.professionalAccent
-                          : semanticTheme.accent,
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: [
-                        BoxShadow(
-                          color:
-                              theme.professionalAccent.withValues(alpha: 0.30),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      semanticTheme.icon,
-                      color: theme.accent,
-                      size: 30,
-                    ),
-                  ),
-                ],
-              ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 8),
+            Text(
+              isArabic
+                  ? 'اتبع الخطوات التالية لإتمام الإجراء بسرعة.'
+                  : locale == 'en'
+                      ? 'Follow these clear steps to complete your procedure.'
+                      : 'Suivez ces étapes claires pour terminer votre démarche.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: const Color(0xFF667085),
+                  ),
+            ),
+            const SizedBox(height: 14),
             Wrap(
               spacing: 10,
               runSpacing: 10,
@@ -249,51 +152,51 @@ class _ProcedureHero extends StatelessWidget {
                 _SummaryPill(
                   icon: Icons.schedule_rounded,
                   label: procedure.summary.estimatedDuration,
-                  profile: profile,
-                  theme: theme,
                 ),
                 _SummaryPill(
                   icon: Icons.payments_rounded,
                   label: procedure.summary.estimatedCost,
-                  profile: profile,
-                  theme: theme,
                 ),
                 _SummaryPill(
-                  icon: Icons.account_balance_rounded,
+                  icon: Icons.format_list_numbered_rounded,
                   label: isArabic
-                      ? '${procedure.summary.officesToVisit} مكاتب'
-                      : '${procedure.summary.officesToVisit} offices',
-                  profile: profile,
-                  theme: theme,
+                      ? '$stepsCount خطوات'
+                      : locale == 'en'
+                          ? '$stepsCount steps'
+                          : '$stepsCount étapes',
                 ),
+                if (offices > 0)
+                  _SummaryPill(
+                    icon: Icons.account_balance_rounded,
+                    label: isArabic
+                        ? '$offices مكاتب'
+                        : locale == 'en'
+                            ? '$offices offices'
+                            : '$offices bureaux',
+                  ),
               ],
             ),
-            if (isEnterprise) ...[
-              const SizedBox(height: 18),
-              Row(
-                children: [
-                  Expanded(
-                    child: _EnterpriseSignalTile(
-                      label: isArabic
-                          ? 'وضع GenUI'
-                          : 'Mode GenUI',
-                      value: semanticTheme.label,
-                      icon: Icons.verified_user_rounded,
-                      color: semanticTheme.accent,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _EnterpriseSignalTile(
-                      label: isArabic ? 'التكوين' : 'Composition',
-                      value: semanticTheme.summaryHint,
-                      icon: Icons.domain_verification_rounded,
-                      color: theme.professionalAccent,
-                    ),
-                  ),
-                ],
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton.icon(
+                onPressed: onToggleSimplified,
+                icon: Icon(
+                  simplified ? Icons.visibility_rounded : Icons.visibility_outlined,
+                ),
+                label: Text(
+                  isArabic
+                      ? (simplified ? 'عرض النسخة الكاملة' : 'عرض نسخة مبسطة')
+                      : locale == 'en'
+                          ? (simplified
+                              ? 'Show full version'
+                              : 'Show simplified version')
+                          : (simplified
+                              ? 'Voir version complète'
+                              : 'Voir version simplifiée'),
+                ),
               ),
-            ],
+            ),
           ],
         ),
       ),
@@ -301,115 +204,24 @@ class _ProcedureHero extends StatelessWidget {
   }
 }
 
-String _heroSubtitle(
-  bool isEnterprise,
-  ProcedureSemanticTheme semanticTheme,
-  {required String locale}
-) {
-  final isArabic = locale == 'ar';
-  final isEnglish = locale == 'en';
-
-  if (isEnterprise) {
-    if (isArabic) {
-      return switch (semanticTheme.id) {
-        'business_launch' => 'عرض تنفيذي لمرحلة الإطلاق والامتثال والتفعيل الإداري.',
-        'legal_transfer' => 'متابعة الملف التعاقدي ووثائق التحويل والمسار الإداري.',
-        'acquisition' => 'قراءة موجهة للميزانية والمزود وإتمام إجراءات الاستعمال.',
-        'renewal' => 'عرض تشغيلي للتجديد والإيداع والاستلام النهائي.',
-        _ => 'عرض تنفيذي للإجراء والتكاليف والتفاعل مع الإدارة.',
-      };
-    }
-    if (isEnglish) {
-      return switch (semanticTheme.id) {
-        'business_launch' =>
-          'Executive view of launch, compliance, and administrative activation.',
-        'legal_transfer' =>
-          'Contract-focused flow with transfer documents and admin path.',
-        'acquisition' =>
-          'Budget and supplier-focused view with road-readiness steps.',
-        'renewal' =>
-          'Operational view for renewal, submissions, and final pickup.',
-        _ => 'Executive overview of the procedure, costs, and admin touchpoints.',
-      };
-    }
-    return switch (semanticTheme.id) {
-      'business_launch' =>
-        'Vue executive du lancement, de la conformite et des activations administratives.',
-      'legal_transfer' =>
-        'Pilotage du dossier contractuel, des pieces de cession et du passage administratif.',
-      'acquisition' =>
-        'Lecture orientee budget, fournisseur et mise en circulation de l acquisition.',
-      'renewal' =>
-        'Vue operationnelle du renouvellement, des depots et du retrait final.',
-      _ =>
-        'Vue executive de la formalite, des couts et des interactions administratives.',
-    };
-  }
-
-  if (isArabic) {
-    return switch (semanticTheme.id) {
-      'legal_transfer' => 'ملخص واضح لعملية النقل والوثائق التعاقدية والجهة المعنية.',
-      'acquisition' => 'ملخص واضح لعملية الشراء والرسوم والوثائق المطلوبة.',
-      'renewal' => 'ملخص واضح للتحديث والإيداع والاستلام النهائي.',
-      'business_launch' => 'عرض مبسط للتأسيس والتكاليف ومراحل الانطلاق.',
-      _ => 'ملخص واضح للإجراء والتكلفة والخطوات أمام الشباك.',
-    };
-  }
-  if (isEnglish) {
-    return switch (semanticTheme.id) {
-      'legal_transfer' =>
-        'Clear transfer summary with contractual documents and office guidance.',
-      'acquisition' =>
-        'Clear purchase summary with fees and required documents.',
-      'renewal' =>
-        'Clear update summary with submission and final pickup.',
-      'business_launch' =>
-        'Simplified launch view with costs and startup steps.',
-      _ => 'Clear overview of steps, costs, and office visit path.',
-    };
-  }
-
-  return switch (semanticTheme.id) {
-    'legal_transfer' =>
-      'Resume clair du transfert, des pieces contractuelles et du bureau a contacter.',
-    'acquisition' =>
-      'Resume clair de l achat, des frais et des documents a preparer.',
-    'renewal' =>
-      'Resume clair de la mise a jour, des depots et du retrait final.',
-    'business_launch' =>
-      'Vue simplifiee de la creation, des couts et des etapes de lancement.',
-    _ => 'Resume clair de la demarche, du cout et du passage au guichet.',
-  };
-}
-
 class _SummaryPill extends StatelessWidget {
   const _SummaryPill({
     required this.icon,
     required this.label,
-    required this.profile,
-    required this.theme,
   });
 
   final IconData icon;
   final String label;
-  final ProfileType profile;
-  final ProfileThemeData theme;
 
   @override
   Widget build(BuildContext context) {
-    final isEnterprise = profile == ProfileType.enterprise;
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
       decoration: BoxDecoration(
-        color: isEnterprise
-            ? Colors.white.withValues(alpha: 0.10)
-            : theme.accent.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(isEnterprise ? 14 : 999),
+        color: const Color(0xFFF2F4F7),
+        borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: isEnterprise
-              ? Colors.white.withValues(alpha: 0.12)
-              : theme.accent.withValues(alpha: 0.10),
+          color: const Color(0xFFD0D5DD),
         ),
       ),
       child: Row(
@@ -418,76 +230,14 @@ class _SummaryPill extends StatelessWidget {
           Icon(
             icon,
             size: 16,
-            color: isEnterprise ? theme.professionalAccent : theme.accent,
+            color: const Color(0xFF344054),
           ),
           const SizedBox(width: 6),
           Text(
             label,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: isEnterprise ? Colors.white : theme.accent,
+                  color: const Color(0xFF344054),
                 ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _EnterpriseSignalTile extends StatelessWidget {
-  const _EnterpriseSignalTile({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.color,
-  });
-
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.16),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, size: 18, color: color),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.72),
-                      ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: Colors.white,
-                      ),
-                ),
-              ],
-            ),
           ),
         ],
       ),
