@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'models/ui_block_model.dart';
+import 'widgets/ai_action_grid_block_widget.dart';
+import 'widgets/ai_overview_block_widget.dart';
 import 'widgets/checklist_block_widget.dart';
 import 'widgets/cost_table_block_widget.dart';
 import 'widgets/faq_list_block_widget.dart';
@@ -29,13 +31,15 @@ class BlockRenderer extends StatelessWidget {
 
   Widget _buildBlock(UiBlockModel block) {
     return switch (block.type) {
+      'ai_overview' => AiOverviewBlockWidget(data: block.data),
+      'ai_action_grid' => AiActionGridBlockWidget(data: block.data),
       'info_card' => InfoCardBlockWidget(data: block.data),
       'stepper' => StepperBlockWidget(data: block.data),
       'checklist' => ChecklistBlockWidget(data: block.data),
       'cost_table' => CostTableBlockWidget(data: block.data),
       'office_map_placeholder' => OfficeMapPlaceholderBlockWidget(
-        data: block.data,
-      ),
+          data: block.data,
+        ),
       'office_list' => OfficeListBlockWidget(data: block.data),
       'faq_list' => FAQListBlockWidget(data: block.data),
       'section_title' => SectionTitleBlockWidget(data: block.data),

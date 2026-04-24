@@ -7,7 +7,9 @@ import '../../core/api/api_providers.dart';
 import '../../core/api/language_utils.dart';
 import '../../core/constants/route_paths.dart';
 import '../../core/genui/genui_providers.dart';
+import '../../core/genui/procedure_page_composer.dart';
 import '../../core/genui/profile_config.dart';
+import '../../core/locale/locale_provider.dart';
 import '../../core/utils/async_value_widget.dart';
 import '../../renderer/block_renderer.dart';
 import '../../shared/models/procedure_model.dart';
@@ -26,6 +28,7 @@ class ProcedureDetailScreen extends ConsumerWidget {
         : ref.watch(procedureDetailProvider(slug));
     final profile = ref.watch(effectiveProfileProvider);
     final profileTheme = getThemeByProfile(profile);
+    final locale = ref.watch(localeProvider);
     final isArabic = LanguageUtils.isArabic(slug);
     final textDirection = isArabic ? TextDirection.rtl : TextDirection.ltr;
 
@@ -37,29 +40,37 @@ class ProcedureDetailScreen extends ConsumerWidget {
         body: SafeArea(
           child: AsyncValueWidget<ProcedureModel>(
             value: detailValue,
-            data: (procedure) => ListView(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
-              children: [
-                _ProcedureHero(
-                  procedure: procedure,
-                  isArabic: isArabic,
-                  profile: profile,
-                  theme: profileTheme,
-                ),
-                const SizedBox(height: 18),
-                BlockRenderer(blocks: procedure.blocks),
-                const SizedBox(height: 6),
-                FilledButton.icon(
-                  onPressed: () => context.push(
-                    '${RoutePaths.offices}?stepId=mutation-dossier',
+            data: (procedure) {
+              final composedBlocks = ProcedurePageComposer.compose(
+                procedure: procedure,
+                profile: profile,
+                locale: locale,
+              );
+
+              return ListView(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+                children: [
+                  _ProcedureHero(
+                    procedure: procedure,
+                    isArabic: isArabic,
+                    profile: profile,
+                    theme: profileTheme,
                   ),
-                  icon: const Icon(Icons.near_me_rounded),
-                  label: Text(
-                    isArabic ? 'اعثر على أقرب مكتب' : 'Find nearest office',
+                  const SizedBox(height: 18),
+                  BlockRenderer(blocks: composedBlocks),
+                  const SizedBox(height: 6),
+                  FilledButton.icon(
+                    onPressed: () => context.push(
+                      '${RoutePaths.offices}?stepId=mutation-dossier',
+                    ),
+                    icon: const Icon(Icons.near_me_rounded),
+                    label: Text(
+                      isArabic ? 'اعثر على أقرب مكتب' : 'Find nearest office',
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -98,8 +109,7 @@ class _ProcedureHero extends StatelessWidget {
         border: Border.all(color: theme.borderTint),
         boxShadow: [
           BoxShadow(
-            color: (isEnterprise ? theme.accent : theme.accent)
-                .withValues(alpha: isEnterprise ? 0.20 : 0.07),
+            color: theme.accent.withValues(alpha: isEnterprise ? 0.20 : 0.07),
             blurRadius: isEnterprise ? 28 : 18,
             offset: const Offset(0, 16),
           ),

@@ -215,152 +215,165 @@ class _StructuredCategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: Colors.white,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isFeatured
-                  ? category.accentColor.withValues(alpha: 0.28)
-                  : const Color(0xFFD7DEE8),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF172033).withValues(alpha: 0.05),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-            child: IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    width: 5,
-                    decoration: BoxDecoration(
-                      color: isFeatured
-                          ? const Color(0xFFD6A94A)
-                          : category.accentColor,
-                      borderRadius: BorderRadius.circular(99),
-                    ),
+            child: Ink(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isFeatured
+                      ? category.accentColor.withValues(alpha: 0.28)
+                      : const Color(0xFFD7DEE8),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF172033).withValues(alpha: 0.05),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Container(
+                        width: 5,
+                        decoration: BoxDecoration(
+                          color: isFeatured
+                              ? const Color(0xFFD6A94A)
+                              : category.accentColor,
+                          borderRadius: BorderRadius.circular(99),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                color: category.accentColor
-                                    .withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                category.icon,
-                                color: category.accentColor,
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Wrap(
-                                    spacing: 8,
-                                    runSpacing: 8,
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 44,
+                                  height: 44,
+                                  decoration: BoxDecoration(
+                                    color: category.accentColor.withValues(
+                                      alpha: 0.08,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Icon(
+                                    category.icon,
+                                    color: category.accentColor,
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      StatusBadge(
-                                        label: getCategoryEnterpriseLabel(
-                                          category.id,
-                                        ),
-                                        color: category.accentColor,
-                                        backgroundAlpha: 0.06,
-                                        borderAlpha: 0.12,
+                                      Wrap(
+                                        spacing: 8,
+                                        runSpacing: 8,
+                                        children: [
+                                          StatusBadge(
+                                            label: getCategoryEnterpriseLabel(
+                                              category.id,
+                                            ),
+                                            color: category.accentColor,
+                                            backgroundAlpha: 0.06,
+                                            borderAlpha: 0.12,
+                                          ),
+                                          if (isFeatured)
+                                            const StatusBadge(
+                                              label: 'Prioritaire',
+                                              color: Color(0xFFD6A94A),
+                                              backgroundAlpha: 0.10,
+                                              borderAlpha: 0.18,
+                                            ),
+                                        ],
                                       ),
-                                      if (isFeatured)
-                                        const StatusBadge(
-                                          label: 'STATUT PRIORITAIRE',
-                                          color: Color(0xFFD6A94A),
-                                          backgroundAlpha: 0.10,
-                                          borderAlpha: 0.18,
+                                      const SizedBox(height: 10),
+                                      Text(
+                                        category.title(locale),
+                                        maxLines:
+                                            constraints.maxWidth < 340 ? 2 : 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: GoogleFonts.dmSans(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w700,
+                                          color: const Color(0xFF101828),
                                         ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Bloc de gestion et de conformite.',
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: const Color(0xFF667085),
+                                            ),
+                                      ),
                                     ],
                                   ),
-                                  const SizedBox(height: 10),
-                                  Text(
-                                    category.title(locale),
-                                    style: GoogleFonts.dmSans(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700,
-                                      color: const Color(0xFF101828),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 14),
+                            Divider(
+                              height: 1,
+                              color:
+                                  category.accentColor.withValues(alpha: 0.12),
+                            ),
+                            const SizedBox(height: 10),
+                            for (final proc in procedures)
+                              _StructuredProcedureRow(
+                                label: CategoryProceduresData.localizedName(
+                                  proc,
+                                  locale,
+                                ),
+                                color: category.accentColor,
+                                onTap: () =>
+                                    onProcedureTap(proc['slug'] as String),
+                              ),
+                            const Spacer(),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                'Consulter',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelLarge
+                                    ?.copyWith(
+                                      color: category.accentColor,
                                     ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Bloc de gestion et de conformite.',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
-                                        ?.copyWith(
-                                          color: const Color(0xFF667085),
-                                        ),
-                                  ),
-                                ],
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 14),
-                        Divider(
-                          height: 1,
-                          color: category.accentColor.withValues(alpha: 0.12),
-                        ),
-                        const SizedBox(height: 10),
-                        for (final proc in procedures)
-                          _StructuredProcedureRow(
-                            label: CategoryProceduresData.localizedName(
-                              proc,
-                              locale,
-                            ),
-                            color: category.accentColor,
-                            onTap: () => onProcedureTap(proc['slug'] as String),
-                          ),
-                        const Spacer(),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            'Consulter',
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelLarge
-                                ?.copyWith(
-                                  color: category.accentColor,
-                                ),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
