@@ -18,7 +18,7 @@ class AppConfig {
   static const Duration requestTimeout = Duration(seconds: 30);
 
   /// How often to poll for background task completion.
-  static const Duration pollInterval = Duration(seconds: 2);
+  static const Duration pollInterval = Duration(milliseconds: 900);
 
   /// Maximum time to keep polling before giving up.
   static const Duration maxPollDuration = Duration(seconds: 120);

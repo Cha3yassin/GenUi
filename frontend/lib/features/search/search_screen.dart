@@ -7,6 +7,7 @@ import '../../core/constants/route_paths.dart';
 import '../../core/genui/genui_providers.dart';
 import '../../core/genui/profile_config.dart';
 import '../../core/genui/procedure_config.dart';
+import '../../core/locale/app_strings.dart';
 import '../../core/utils/async_value_widget.dart';
 import '../../shared/models/procedure_summary_model.dart';
 import '../../shared/widgets/adaptive_empty_state.dart';
@@ -54,7 +55,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     return Scaffold(
       backgroundColor: theme.pageBackground,
-      appBar: AppBar(title: const Text('Search')),
+      appBar: AppBar(
+        title: Text(
+          profile == ProfileType.enterprise
+              ? content.searchTitleText(locale)
+              : AppStrings.get('search_hint', locale).split(':').first,
+        ),
+      ),
       body: SafeArea(
         child: Container(
           color: theme.pageBackground,
@@ -65,7 +72,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               children: [
                 AnimatedReveal(
                   child: profile == ProfileType.enterprise
-                      ? _EnterpriseSearchHeader(theme: theme)
+                      ? _EnterpriseSearchHeader(theme: theme, locale: locale)
                       : ContextualHeader(
                           badge: content.badgeText(locale),
                           title: content.searchTitleText(locale),
@@ -139,8 +146,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 const SizedBox(height: 26),
                 SectionHeader(
                   title: profile == ProfileType.enterprise
-                      ? 'Resultats entreprise'
-                      : 'Results',
+                      ? content.searchSuggestionsTitleText(locale)
+                      : locale == 'ar'
+                          ? 'النتائج'
+                          : locale == 'en'
+                              ? 'Results'
+                              : 'Résultats',
                 ),
                 const SizedBox(height: 12),
                 AsyncValueWidget<List<ProcedureSummaryModel>>(
@@ -169,6 +180,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                               highlightLabel: _highlightForProcedure(
                                 procedure.slug,
                                 profile,
+                                locale,
                               ),
                               onTap: () {
                                 FocusManager.instance.primaryFocus?.unfocus();
@@ -190,16 +202,24 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
-  String? _highlightForProcedure(String slug, ProfileType profile) {
+  String? _highlightForProcedure(
+    String slug,
+    ProfileType profile,
+    String locale,
+  ) {
     final priority = getProcedureConfig(slug)?.priority(profile) ?? 0;
-    return priority >= 85 ? 'Top match' : null;
+    if (priority < 85) return null;
+    if (locale == 'ar') return 'أفضل تطابق';
+    if (locale == 'en') return 'Top match';
+    return 'Meilleur résultat';
   }
 }
 
 class _EnterpriseSearchHeader extends StatelessWidget {
-  const _EnterpriseSearchHeader({required this.theme});
+  const _EnterpriseSearchHeader({required this.theme, required this.locale});
 
   final ProfileThemeData theme;
+  final String locale;
 
   @override
   Widget build(BuildContext context) {
@@ -229,14 +249,22 @@ class _EnterpriseSearchHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Recherche entreprise',
+                  locale == 'ar'
+                      ? 'بحث الشركات'
+                      : locale == 'en'
+                          ? 'Business search'
+                          : 'Recherche entreprise',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: Colors.white,
                       ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Accedez rapidement aux formalites de registre, fiscalite et CNSS avec une recherche orientee gestion.',
+                  locale == 'ar'
+                      ? 'يمكنك الوصول بسرعة إلى إجراءات السجل والضرائب وCNSS عبر بحث موجّه للتسيير.'
+                      : locale == 'en'
+                          ? 'Quickly access registry, tax, and CNSS procedures with management-focused search.'
+                          : 'Accédez rapidement aux formalités de registre, fiscalité et CNSS avec une recherche orientée gestion.',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: theme.heroMutedForeground,
                         height: 1.45,

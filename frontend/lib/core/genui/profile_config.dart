@@ -160,91 +160,93 @@ const _individualContent = ProfileContent(
   badge: {
     'fr': 'Parcours citoyen',
     'en': 'Citizen flow',
-    'ar': 'Citizen flow',
+    'ar': 'مسار المواطن',
   },
   title: {
     'fr': 'Vos demarches personnelles.',
     'en': 'Your personal procedures, sorted by priority.',
-    'ar': 'Your personal procedures, sorted by priority.',
+    'ar': 'إجراءاتك الشخصية مرتبة حسب الأولوية.',
   },
   subtitle: {
     'fr':
         'Un espace doux et accessible pour gerer l identite, la residence, les documents personnels et la protection sociale.',
     'en':
         'Move faster through everyday paperwork: identity, passport, residence, social coverage, and vehicles.',
-    'ar': 'Move faster through everyday paperwork.',
+    'ar':
+        'أنجز معاملاتك اليومية أسرع: الهوية، جواز السفر، السكن، التغطية الاجتماعية، والمركبات.',
   },
   recommendationsTitle: {
     'fr': 'A faire en premier',
     'en': 'Start here',
-    'ar': 'Start here',
+    'ar': 'ابدأ من هنا',
   },
   recommendationsSubtitle: {
     'fr': 'Des procedures utiles pour une personne physique.',
     'en': 'Useful procedures for an individual account.',
-    'ar': 'Useful procedures for an individual account.',
+    'ar': 'إجراءات مفيدة لحساب فردي.',
   },
   categoriesTitle: {
     'fr': 'Espaces citoyens prioritaires',
     'en': 'Most useful categories for you',
-    'ar': 'Most useful categories for you',
+    'ar': 'الفئات الأكثر فائدة لك',
   },
   categoriesSubtitle: {
     'fr':
         'Les categories du quotidien sont mises en avant avec une presentation plus simple et rassurante.',
     'en':
         'Citizen-focused areas rise to the top while the rest stay available.',
-    'ar': 'Citizen-focused areas rise to the top.',
+    'ar': 'يتم إبراز المجالات الموجهة للمواطن مع الإبقاء على باقي الفئات متاحة.',
   },
   searchHint: {
     'fr': 'Rechercher une procedure personnelle : CIN, passeport, residence...',
     'en': 'Search a personal procedure: ID card, passport, residence...',
-    'ar': 'Search a personal procedure...',
+    'ar': 'ابحث عن إجراء شخصي: بطاقة هوية، جواز سفر، سكن...',
   },
   searchTitle: {
     'fr': 'Recherche personnelle',
     'en': 'Personal search',
-    'ar': 'Personal search',
+    'ar': 'بحث شخصي',
   },
   searchSubtitle: {
     'fr':
         'Des suggestions orientees citoyen et des resultats reclasses pour vous.',
     'en': 'Citizen-oriented suggestions and profile-aware ranking.',
-    'ar': 'Citizen-oriented suggestions and profile-aware ranking.',
+    'ar': 'اقتراحات موجهة للمواطن ونتائج مرتبة حسب ملفك.',
   },
   searchSuggestionsTitle: {
     'fr': 'Suggestions citoyennes',
     'en': 'Citizen suggestions',
-    'ar': 'Citizen suggestions',
+    'ar': 'اقتراحات للمواطن',
   },
   searchSuggestionsSubtitle: {
     'fr': 'Commencez par une demande du quotidien.',
     'en': 'Start with an everyday request.',
-    'ar': 'Start with an everyday request.',
+    'ar': 'ابدأ بطلب من معاملاتك اليومية.',
   },
   emptyTitle: {
     'fr': 'Aucun resultat adapte',
     'en': 'No relevant result',
-    'ar': 'No relevant result',
+    'ar': 'لا توجد نتيجة مناسبة',
   },
   emptyBody: {
     'fr':
         'Essayez une demande personnelle plus large ou parcourez les categories recommandees.',
     'en':
         'Try a broader personal request or browse the recommended categories.',
-    'ar': 'Try a broader request.',
+    'ar': 'جرّب طلبًا شخصيًا أوسع أو تصفح الفئات المقترحة.',
   },
   trustTitle: {
     'fr': 'Assistant pour vos papiers du quotidien',
     'en': 'Assistant for everyday paperwork',
-    'ar': 'Assistant for everyday paperwork',
+    'ar': 'مساعد لمعاملاتك اليومية',
   },
   trustBody: {
     'fr':
         'L interface vous guide d abord vers les demarches citoyennes les plus frequentes, avec un parcours simple et rassurant.',
     'en':
         'The interface guides you first toward the most common citizen procedures, with a simple and reassuring flow.',
-    'ar': 'The interface guides you through common citizen procedures.',
+    'ar':
+        'توجّهك الواجهة أولاً نحو أكثر الإجراءات شيوعًا للمواطن بطريقة بسيطة ومطمئنة.',
   },
 );
 
@@ -252,12 +254,12 @@ const _enterpriseContent = ProfileContent(
   badge: {
     'fr': 'Espace entreprise',
     'en': 'Business cockpit',
-    'ar': 'Business cockpit',
+    'ar': 'فضاء المؤسسة',
   },
   title: {
     'fr': 'Tableau de bord entreprise',
     'en': 'Your business obligations, organized like a dashboard.',
-    'ar': 'Your business obligations, organized like a dashboard.',
+    'ar': 'التزامات شركتك مرتبة كلوحة متابعة.',
   },
   subtitle: {
     'fr':
@@ -265,82 +267,81 @@ const _enterpriseContent = ProfileContent(
     'en':
         'Bring creation, tax, registry, CNSS, and management procedures forward with a more structured experience.',
     'ar':
-        'Business procedures are brought forward with a more structured experience.',
+        'تابع إجراءات التأسيس والضرائب والسجل وCNSS ضمن تجربة أكثر تنظيمًا.',
   },
   recommendationsTitle: {
     'fr': 'Actions administratives prioritaires',
     'en': 'Business priorities',
-    'ar': 'Business priorities',
+    'ar': 'أولويات المؤسسة',
   },
   recommendationsSubtitle: {
     'fr':
         'Des blocs de travail clairs pour la creation, la fiscalite et le social.',
     'en': 'The most useful procedures to launch or manage a company.',
-    'ar': 'The most useful procedures to launch or manage a company.',
+    'ar': 'أهم الإجراءات لإطلاق الشركة أو إدارتها.',
   },
   categoriesTitle: {
     'fr': 'Piliers de conformite',
     'en': 'Strategic areas',
-    'ar': 'Strategic areas',
+    'ar': 'محاور استراتيجية',
   },
   categoriesSubtitle: {
     'fr':
         'Les domaines business sont presentes avec une hierarchie plus dashboard et une lecture plus dense.',
     'en':
         'Creation, tax, and compliance are prioritized without hiding the rest.',
-    'ar': 'Creation, tax, and compliance are prioritized.',
+    'ar': 'يتم إبراز التأسيس والجباية والامتثال دون إخفاء باقي المجالات.',
   },
   searchHint: {
     'fr': 'Rechercher une formalite entreprise : RNE, TVA, patente, CNSS...',
     'en': 'Search a business procedure: RNE, VAT, patent...',
-    'ar': 'Search a business procedure...',
+    'ar': 'ابحث عن إجراء للمؤسسة: RNE، TVA، باتينت، CNSS...',
   },
   searchTitle: {
     'fr': 'Recherche entreprise',
     'en': 'Business search',
-    'ar': 'Business search',
+    'ar': 'بحث المؤسسات',
   },
   searchSubtitle: {
     'fr':
         'Suggestions orientees gestion administrative et resultats classes pour un entrepreneur.',
     'en':
         'Administrative management suggestions and entrepreneur-aware ranking.',
-    'ar':
-        'Administrative management suggestions and entrepreneur-aware ranking.',
+    'ar': 'اقتراحات موجهة للتسيير الإداري ونتائج مرتبة لرواد الأعمال.',
   },
   searchSuggestionsTitle: {
     'fr': 'Filtres rapides entreprise',
     'en': 'Business suggestions',
-    'ar': 'Business suggestions',
+    'ar': 'اقتراحات للمؤسسة',
   },
   searchSuggestionsSubtitle: {
     'fr': 'Accedez vite aux formalites fiscales, sociales et de registre.',
     'en': 'Start with a key obligation or formal step.',
-    'ar': 'Start with a key obligation or formal step.',
+    'ar': 'ابدأ بالتزام أساسي أو إجراء رسمي مهم.',
   },
   emptyTitle: {
     'fr': 'Aucun resultat prioritaire',
     'en': 'No business-first result',
-    'ar': 'No business-first result',
+    'ar': 'لا توجد نتيجة مناسبة للمؤسسة',
   },
   emptyBody: {
     'fr':
         'Essayez un terme comme RNE, TVA, patente ou declaration fiscale pour remonter les bonnes procedures.',
     'en':
         'Try a term such as RNE, VAT, patent, or tax declaration to surface the right procedures.',
-    'ar': 'Try a term such as RNE or VAT.',
+    'ar': 'جرّب كلمات مثل RNE أو TVA أو تصريح ضريبي لإظهار الإجراءات المناسبة.',
   },
   trustTitle: {
     'fr': 'Assistant de gestion administrative',
     'en': 'Administrative operations assistant',
-    'ar': 'Administrative operations assistant',
+    'ar': 'مساعد التسيير الإداري',
   },
   trustBody: {
     'fr':
         'L interface met d abord en avant les formalites de conformite, de registre et de fiscalite pour une lecture plus professionnelle.',
     'en':
         'The interface prioritizes compliance, registry, and taxation procedures for a more professional workflow.',
-    'ar': 'The interface prioritizes compliance, registry, and tax procedures.',
+    'ar': 'تُعطي الواجهة الأولوية لإجراءات الامتثال والسجل والجباية ضمن مسار احترافي.',
   },
 );
 
@@ -378,19 +379,21 @@ ProfileUiVariant getProfileUiVariant(ProfileType profile) {
 
 String activeProfileTitle(ProfileType profile, String locale) {
   if (profile == ProfileType.enterprise) {
-    return locale == 'en'
-        ? 'Business workspace active'
-        : 'Espace entreprise actif';
+    if (locale == 'ar') return 'وضع المؤسسة مفعّل';
+    return locale == 'en' ? 'Business workspace active' : 'Espace entreprise actif';
   }
 
+  if (locale == 'ar') return 'وضع الفرد مفعّل';
   return locale == 'en' ? 'Citizen profile active' : 'Profil citoyen actif';
 }
 
 String activeProfileSubtitle(ProfileType profile, String locale) {
   if (profile == ProfileType.enterprise) {
+    if (locale == 'ar') return 'شركة / رائد أعمال';
     return locale == 'en' ? 'Company / Entrepreneur' : 'Societe / Entrepreneur';
   }
 
+  if (locale == 'ar') return 'حساب فردي';
   return locale == 'en' ? 'Individual account' : 'Compte individuel';
 }
 
@@ -404,22 +407,23 @@ List<ProfileQuickFilter> getQuickFilters(ProfileType profile, String locale) {
   if (profile == ProfileType.enterprise) {
     return [
       ProfileQuickFilter(
-        label: locale == 'en' ? 'Tax' : 'Fiscalite',
+        label: locale == 'ar' ? 'جباية' : locale == 'en' ? 'Tax' : 'Fiscalite',
         query: 'TVA',
         icon: Icons.calculate_rounded,
       ),
       ProfileQuickFilter(
-        label: locale == 'en' ? 'Creation' : 'Creation',
+        label: locale == 'ar' ? 'تأسيس' : locale == 'en' ? 'Creation' : 'Creation',
         query: 'SARL',
         icon: Icons.apartment_rounded,
       ),
       ProfileQuickFilter(
-        label: locale == 'en' ? 'Social' : 'Social',
+        label: locale == 'ar' ? 'اجتماعي' : locale == 'en' ? 'Social' : 'Social',
         query: 'CNSS',
         icon: Icons.shield_rounded,
       ),
       ProfileQuickFilter(
-        label: locale == 'en' ? 'Registry' : 'Registre',
+        label:
+            locale == 'ar' ? 'السجل' : locale == 'en' ? 'Registry' : 'Registre',
         query: 'RNE',
         icon: Icons.badge_rounded,
       ),
@@ -428,17 +432,19 @@ List<ProfileQuickFilter> getQuickFilters(ProfileType profile, String locale) {
 
   return [
     ProfileQuickFilter(
-      label: locale == 'en' ? 'Identity' : 'Identite',
+      label:
+          locale == 'ar' ? 'هوية' : locale == 'en' ? 'Identity' : 'Identite',
       query: 'CIN',
       icon: Icons.badge_rounded,
     ),
     ProfileQuickFilter(
-      label: locale == 'en' ? 'Travel' : 'Voyage',
+      label: locale == 'ar' ? 'سفر' : locale == 'en' ? 'Travel' : 'Voyage',
       query: 'passeport',
       icon: Icons.card_travel_rounded,
     ),
     ProfileQuickFilter(
-      label: locale == 'en' ? 'Residence' : 'Residence',
+      label:
+          locale == 'ar' ? 'سكن' : locale == 'en' ? 'Residence' : 'Residence',
       query: 'residence',
       icon: Icons.home_rounded,
     ),

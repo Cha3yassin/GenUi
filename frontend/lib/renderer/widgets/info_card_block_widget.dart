@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/genui/genui_providers.dart';
 import '../../core/genui/profile_config.dart';
+import '../../core/locale/locale_provider.dart';
 
 class InfoCardBlockWidget extends ConsumerWidget {
   const InfoCardBlockWidget({required this.data, super.key});
@@ -14,6 +15,7 @@ class InfoCardBlockWidget extends ConsumerWidget {
     final title = data['title'] as String? ?? 'Information';
     final body = data['body'] as String? ?? '';
     final profile = ref.watch(effectiveProfileProvider);
+    final locale = ref.watch(localeProvider);
     final theme = getThemeByProfile(profile);
     final isEnterprise = profile == ProfileType.enterprise;
 
@@ -78,7 +80,11 @@ class InfoCardBlockWidget extends ConsumerWidget {
                         border: Border.all(color: theme.borderTint),
                       ),
                       child: Text(
-                        'Avant action',
+                        locale == 'ar'
+                            ? 'قبل الإجراء'
+                            : locale == 'en'
+                                ? 'Before action'
+                                : 'Avant action',
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
                               color: theme.secondaryAccent,
                             ),

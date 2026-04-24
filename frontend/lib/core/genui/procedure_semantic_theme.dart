@@ -28,6 +28,8 @@ ProcedureSemanticTheme inferProcedureSemanticTheme(
   ProcedureModel procedure, {
   String locale = 'fr',
 }) {
+  final isArabic = locale == 'ar';
+  final isEnglish = locale == 'en';
   final corpus = _normalizedCorpus(procedure);
 
   if (_matchesAny(corpus, const [
@@ -38,15 +40,23 @@ ProcedureSemanticTheme inferProcedureSemanticTheme(
     'vendeur',
     'contrat de vente',
   ])) {
-    return const ProcedureSemanticTheme(
+    return ProcedureSemanticTheme(
       id: 'legal_transfer',
-      label: 'Mutation / Vente',
+      label: isArabic
+          ? 'نقل / بيع'
+          : isEnglish
+              ? 'Transfer / Sale'
+              : 'Mutation / Vente',
       icon: Icons.compare_arrows_rounded,
       accent: Color(0xFF8B5E3C),
       secondary: Color(0xFF355C7D),
       surface: Color(0xFFF8F2ED),
       layoutStyle: 'dossier_first',
-      summaryHint: 'Parcours juridique et pieces contractuelles',
+      summaryHint: isArabic
+          ? 'مسار قانوني ووثائق تعاقدية'
+          : isEnglish
+              ? 'Legal flow and contractual documents'
+              : 'Parcours juridique et pièces contractuelles',
     );
   }
 
@@ -58,15 +68,23 @@ ProcedureSemanticTheme inferProcedureSemanticTheme(
     'facture',
     'vehicule neuf',
   ])) {
-    return const ProcedureSemanticTheme(
+    return ProcedureSemanticTheme(
       id: 'acquisition',
-      label: 'Achat / Acquisition',
+      label: isArabic
+          ? 'شراء / اقتناء'
+          : isEnglish
+              ? 'Purchase / Acquisition'
+              : 'Achat / Acquisition',
       icon: Icons.shopping_bag_rounded,
       accent: Color(0xFF0E7490),
       secondary: Color(0xFF155E75),
       surface: Color(0xFFEFF9FC),
       layoutStyle: 'featured_budget',
-      summaryHint: 'Budget, fournisseur et mise en circulation',
+      summaryHint: isArabic
+          ? 'الميزانية، المزود، وإدخال الاستعمال'
+          : isEnglish
+              ? 'Budget, supplier, and road activation'
+              : 'Budget, fournisseur et mise en circulation',
     );
   }
 
@@ -77,15 +95,23 @@ ProcedureSemanticTheme inferProcedureSemanticTheme(
     'expire',
     'duplicata',
   ])) {
-    return const ProcedureSemanticTheme(
+    return ProcedureSemanticTheme(
       id: 'renewal',
-      label: 'Renouvellement',
+      label: isArabic
+          ? 'تجديد'
+          : isEnglish
+              ? 'Renewal'
+              : 'Renouvellement',
       icon: Icons.autorenew_rounded,
       accent: Color(0xFF2563EB),
       secondary: Color(0xFF1D4ED8),
       surface: Color(0xFFF1F6FF),
       layoutStyle: 'compact_workflow',
-      summaryHint: 'Mise a jour, depot et retrait',
+      summaryHint: isArabic
+          ? 'تحديث، إيداع، واستلام'
+          : isEnglish
+              ? 'Update, submission, and pickup'
+              : 'Mise à jour, dépôt et retrait',
     );
   }
 
@@ -98,27 +124,43 @@ ProcedureSemanticTheme inferProcedureSemanticTheme(
     'rne',
     'patente',
   ])) {
-    return const ProcedureSemanticTheme(
+    return ProcedureSemanticTheme(
       id: 'business_launch',
-      label: 'Creation / Lancement',
+      label: isArabic
+          ? 'تأسيس / إطلاق'
+          : isEnglish
+              ? 'Creation / Launch'
+              : 'Création / Lancement',
       icon: Icons.rocket_launch_rounded,
       accent: Color(0xFFD6A94A),
       secondary: Color(0xFF2F4B7C),
       surface: Color(0xFFF8F4EA),
       layoutStyle: 'dashboard_launch',
-      summaryHint: 'Lancement, conformite et activation',
+      summaryHint: isArabic
+          ? 'إطلاق، امتثال، وتفعيل'
+          : isEnglish
+              ? 'Launch, compliance, and activation'
+              : 'Lancement, conformité et activation',
     );
   }
 
-  return const ProcedureSemanticTheme(
+  return ProcedureSemanticTheme(
     id: 'general_admin',
-    label: 'Procedure administrative',
+    label: isArabic
+        ? 'إجراء إداري'
+        : isEnglish
+            ? 'Administrative procedure'
+            : 'Procédure administrative',
     icon: Icons.account_tree_rounded,
     accent: Color(0xFF4F46E5),
     secondary: Color(0xFF334155),
     surface: Color(0xFFF5F7FB),
     layoutStyle: 'balanced',
-    summaryHint: 'Vue dynamique de la procedure',
+    summaryHint: isArabic
+        ? 'عرض ديناميكي للإجراء'
+        : isEnglish
+            ? 'Dynamic procedure view'
+            : 'Vue dynamique de la procédure',
   );
 }
 

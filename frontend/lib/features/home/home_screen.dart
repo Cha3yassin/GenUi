@@ -510,7 +510,7 @@ class _HomeHeader extends ConsumerWidget {
               icon: const Icon(Icons.menu_rounded, size: 20),
               onPressed: () => Scaffold.of(ctx).openDrawer(),
               padding: EdgeInsets.zero,
-              tooltip: 'Menu',
+              tooltip: locale == 'ar' ? 'القائمة' : locale == 'en' ? 'Menu' : 'Menu',
             ),
           ),
         ),
@@ -518,7 +518,12 @@ class _HomeHeader extends ConsumerWidget {
         _LanguageToggle(locale: locale),
         const SizedBox(width: 10),
         if (authState.isAuthenticated)
-          _UserAvatar(email: authState.user!.email)
+          _UserAvatar(
+            email: authState.user!.email,
+            role: authState.user!.role,
+            locale: locale,
+            onSignOut: () => ref.read(authProvider.notifier).logout(),
+          )
         else
           Container(
             height: 36,
@@ -545,29 +550,99 @@ class _HomeHeader extends ConsumerWidget {
 }
 
 class _UserAvatar extends StatelessWidget {
-  const _UserAvatar({required this.email});
+  const _UserAvatar({
+    required this.email,
+    required this.role,
+    required this.locale,
+    required this.onSignOut,
+  });
 
   final String email;
+  final String role;
+  final String locale;
+  final VoidCallback onSignOut;
 
   @override
   Widget build(BuildContext context) {
     final initial = email.isNotEmpty ? email[0].toUpperCase() : '?';
+    final roleLabel = AppStrings.get(role, locale);
 
-    return Container(
-      width: 36,
-      height: 36,
-      decoration: BoxDecoration(
-        color: AppTheme.terracotta.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.terracotta.withValues(alpha: 0.2)),
-      ),
-      child: Center(
-        child: Text(
-          initial,
-          style: GoogleFonts.dmSans(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: AppTheme.terracotta,
+    return GestureDetector(
+      onTap: () {
+        showDialog<void>(
+          context: context,
+          builder: (dialogContext) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: Text(
+                locale == 'ar'
+                    ? 'الملف الشخصي'
+                    : locale == 'en'
+                        ? 'Profile'
+                        : 'Profil',
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    email,
+                    style: Theme.of(dialogContext).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    roleLabel,
+                    style: Theme.of(dialogContext).textTheme.labelLarge?.copyWith(
+                          color: AppTheme.mutedInk,
+                        ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: Text(
+                    locale == 'ar'
+                        ? 'إغلاق'
+                        : locale == 'en'
+                            ? 'Close'
+                            : 'Fermer',
+                  ),
+                ),
+                FilledButton.icon(
+                  onPressed: () {
+                    Navigator.pop(dialogContext);
+                    onSignOut();
+                  },
+                  icon: const Icon(Icons.logout_rounded, size: 18),
+                  label: Text(AppStrings.get('sign_out', locale)),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFFB3261E),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: AppTheme.terracotta.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppTheme.terracotta.withValues(alpha: 0.2)),
+        ),
+        child: Center(
+          child: Text(
+            initial,
+            style: GoogleFonts.dmSans(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.terracotta,
+            ),
           ),
         ),
       ),
@@ -943,7 +1018,7 @@ class _ProfileHero extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Espace entreprise',
+                        content.titleText(locale),
                         style:
                             Theme.of(context).textTheme.displaySmall?.copyWith(
                                   fontSize: 30,
@@ -953,7 +1028,7 @@ class _ProfileHero extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Gerez vos obligations administratives, fiscales et sociales depuis un tableau de bord structure.',
+                        content.subtitleText(locale),
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                               color: theme.heroMutedForeground,
                               height: 1.45,
@@ -971,7 +1046,7 @@ class _ProfileHero extends StatelessWidget {
               children: [
                 Expanded(
                   child: _EnterpriseMetric(
-                    title: 'Registre',
+                    title: locale == 'ar' ? 'السجل' : locale == 'en' ? 'Registry' : 'Registre',
                     subtitle: 'RNE, SARL',
                     icon: Icons.badge_rounded,
                     theme: theme,
@@ -980,8 +1055,8 @@ class _ProfileHero extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: _EnterpriseMetric(
-                    title: 'Fiscalite',
-                    subtitle: 'TVA, declaration',
+                    title: locale == 'ar' ? 'جباية' : locale == 'en' ? 'Tax' : 'Fiscalite',
+                    subtitle: locale == 'ar' ? 'TVA، تصريح' : locale == 'en' ? 'VAT, declaration' : 'TVA, declaration',
                     icon: Icons.calculate_rounded,
                     theme: theme,
                   ),
@@ -989,8 +1064,8 @@ class _ProfileHero extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: _EnterpriseMetric(
-                    title: 'Social',
-                    subtitle: 'CNSS, obligations',
+                    title: locale == 'ar' ? 'اجتماعي' : locale == 'en' ? 'Social' : 'Social',
+                    subtitle: locale == 'ar' ? 'CNSS، التزامات' : locale == 'en' ? 'CNSS, obligations' : 'CNSS, obligations',
                     icon: Icons.shield_rounded,
                     theme: theme,
                   ),

@@ -47,6 +47,7 @@ async def get_my_history_summaries(
     current_user: CurrentUser,
     db: Annotated[AsyncSession, Depends(get_db)],
     limit: int = Query(default=50, ge=1, le=200),
+    language: str = Query(default="fr", pattern="^(ar|fr|en)$"),
 ) -> HistorySummaryResponse:
     """
     Returns title + date only — no full ai_response payloads.
@@ -72,7 +73,8 @@ async def get_my_history_summaries(
             title_obj = ai_data.get("title", {})
             if isinstance(title_obj, dict):
                 title = (
-                    title_obj.get("fr")
+                    title_obj.get(language)
+                    or title_obj.get("fr")
                     or title_obj.get("en")
                     or title_obj.get("ar")
                     or row.user_message

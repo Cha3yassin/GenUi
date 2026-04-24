@@ -145,7 +145,10 @@ class HttpApiService implements ApiService {
   // ── Search ─────────────────────────────────────────────────────────────────
 
   @override
-  Future<List<ProcedureSummaryModel>> searchProcedures(String query) async {
+  Future<List<ProcedureSummaryModel>> searchProcedures(
+    String query, {
+    String language = 'fr',
+  }) async {
     if (query.trim().length < 2) return [];
 
     try {
@@ -153,7 +156,7 @@ class HttpApiService implements ApiService {
         '/procedures/search',
         queryParameters: {
           'q': query,
-          'language': LanguageUtils.preferredLanguageFor(query),
+          'language': language,
         },
       );
       return (data as List)
@@ -189,15 +192,21 @@ class HttpApiService implements ApiService {
   // ── GenUI with polling ─────────────────────────────────────────────────────
 
   @override
-  Future<ProcedureModel> getProcedureDetail(String slug, {String? role, String? authToken}) async {
+  Future<ProcedureModel> getProcedureDetail(
+    String slug, {
+    String? role,
+    String? authToken,
+    String? language,
+  }) async {
     final message = slug.replaceAll('-', ' ');
-    final language = LanguageUtils.preferredLanguageFor(message);
+    final effectiveLanguage =
+        language ?? LanguageUtils.preferredLanguageFor(message);
 
     try {
       final uri = Uri.parse('${AppConfig.apiV1}/gen-ui/search');
       final body = <String, dynamic>{
         'message': message,
-        'language': language,
+        'language': effectiveLanguage,
       };
       if (role != null) body['role'] = role;
 
@@ -224,7 +233,7 @@ class HttpApiService implements ApiService {
         return ProcedureGuideAdapter.fromJson(
           rawJson,
           slug: slug,
-          language: language,
+          language: effectiveLanguage,
         );
       }
 
@@ -232,7 +241,7 @@ class HttpApiService implements ApiService {
           decoded is Map<String, dynamic> &&
           decoded['task_id'] != null) {
         final taskId = decoded['task_id'] as String;
-        return _pollForResult(taskId, slug, language, authToken: authToken);
+        return _pollForResult(taskId, slug, effectiveLanguage, authToken: authToken);
       }
 
       throw ApiException(
@@ -260,9 +269,13 @@ class HttpApiService implements ApiService {
     final statusUri =
         Uri.parse('${AppConfig.apiV1}/gen-ui/tasks/$taskId/status');
     final message = slug.replaceAll('-', ' ');
+    var isFirstPoll = true;
 
     while (DateTime.now().isBefore(deadline)) {
-      await Future<void>.delayed(AppConfig.pollInterval);
+      if (!isFirstPoll) {
+        await Future<void>.delayed(AppConfig.pollInterval);
+      }
+      isFirstPoll = false;
 
       try {
         final pollResponse =
@@ -338,9 +351,16 @@ class HttpApiService implements ApiService {
   // ── History (authenticated) ────────────────────────────────────────────────
 
   @override
-  Future<List<HistorySummary>> getHistorySummaries(String token) async {
+  Future<List<HistorySummary>> getHistorySummaries(
+    String token, {
+    String language = 'fr',
+  }) async {
     try {
-      final data = await _get('/history/me/summaries', token: token);
+      final data = await _get(
+        '/history/me/summaries',
+        token: token,
+        queryParameters: {'language': language},
+      );
       final items = (data['items'] as List?) ?? [];
       return items
           .map((json) => HistorySummary.fromJson(json as Map<String, dynamic>))
@@ -353,9 +373,16 @@ class HttpApiService implements ApiService {
 
   @override
   Future<Map<String, dynamic>> getHistoryDetail(
-      String token, String historyId) async {
+    String token,
+    String historyId, {
+    String language = 'fr',
+  }) async {
     try {
-      final data = await _get('/history/me/$historyId', token: token);
+      final data = await _get(
+        '/history/me/$historyId',
+        token: token,
+        queryParameters: {'language': language},
+      );
       return data as Map<String, dynamic>;
     } catch (e) {
       if (e is ApiException) rethrow;

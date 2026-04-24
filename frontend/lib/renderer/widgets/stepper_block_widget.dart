@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/genui/genui_providers.dart';
 import '../../core/genui/profile_config.dart';
+import '../../core/locale/locale_provider.dart';
 import '../../shared/models/procedure_step_model.dart';
 import '../../shared/widgets/status_badge.dart';
 
@@ -19,6 +20,7 @@ class StepperBlockWidget extends ConsumerWidget {
         )
         .toList();
     final profile = ref.watch(effectiveProfileProvider);
+    final locale = ref.watch(localeProvider);
     final theme = getThemeByProfile(profile);
     final isEnterprise = profile == ProfileType.enterprise;
 
@@ -46,6 +48,7 @@ class StepperBlockWidget extends ConsumerWidget {
                 isLast: index == steps.length - 1,
                 profile: profile,
                 theme: theme,
+                locale: locale,
               ),
           ],
         ),
@@ -61,6 +64,7 @@ class _StepRow extends StatelessWidget {
     required this.isLast,
     required this.profile,
     required this.theme,
+    required this.locale,
   });
 
   final ProcedureStepModel step;
@@ -68,6 +72,7 @@ class _StepRow extends StatelessWidget {
   final bool isLast;
   final ProfileType profile;
   final ProfileThemeData theme;
+  final String locale;
 
   @override
   Widget build(BuildContext context) {
@@ -162,7 +167,17 @@ class _StepRow extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(bottom: 8),
                         child: StatusBadge(
-                          label: index == 0 ? 'Etape prioritaire' : 'Etape',
+                          label: index == 0
+                              ? (locale == 'ar'
+                                  ? 'خطوة ذات أولوية'
+                                  : locale == 'en'
+                                      ? 'Priority step'
+                                      : 'Etape prioritaire')
+                              : (locale == 'ar'
+                                  ? 'خطوة'
+                                  : locale == 'en'
+                                      ? 'Step'
+                                      : 'Etape'),
                           color: index == 0
                               ? theme.professionalAccent
                               : theme.secondaryAccent,

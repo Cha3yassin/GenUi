@@ -35,6 +35,7 @@ def _count_tokens(text: str) -> int:
 
 _chroma_client: Optional[chromadb.PersistentClient] = None
 _collection: Optional[chromadb.Collection] = None
+_embedding_temporarily_disabled: bool = False
 
 
 def _get_chroma_collection() -> chromadb.Collection:
@@ -71,20 +72,35 @@ async def embed_text(text: str) -> List[float]:
 
     Runs the blocking SDK call in a thread pool to stay non-blocking.
     """
+    global _embedding_temporarily_disabled
+
+    if _embedding_temporarily_disabled:
+        raise RuntimeError("Embedding temporarily disabled due to invalid API key.")
+
+    if not settings.GOOGLE_API_KEY:
+        raise RuntimeError("Missing GOOGLE_API_KEY for embeddings.")
+
     import google.generativeai as genai
 
     genai.configure(api_key=settings.GOOGLE_API_KEY)
 
     loop = asyncio.get_event_loop()
-    result = await loop.run_in_executor(
-        None,
-        lambda: genai.embed_content(
-            model=settings.EMBEDDING_MODEL,
-            content=text,
-            task_type="retrieval_document",
-        ),
-    )
-    return result["embedding"]
+    try:
+        result = await loop.run_in_executor(
+            None,
+            lambda: genai.embed_content(
+                model=settings.EMBEDDING_MODEL,
+                content=text,
+                task_type="retrieval_document",
+            ),
+        )
+        return result["embedding"]
+    except Exception as exc:  # pragma: no cover - SDK/network variability
+        # If the key is invalid, avoid repeatedly calling the remote API.
+        if "API_KEY_INVALID" in str(exc):
+            _embedding_temporarily_disabled = True
+            logger.error("Embedding disabled: invalid Google API key detected.")
+        raise
 
 
 # ── Chunking ──────────────────────────────────────────────────────────────────

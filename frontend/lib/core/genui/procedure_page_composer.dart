@@ -1,4 +1,3 @@
-import '../../core/api/language_utils.dart';
 import '../../renderer/models/ui_block_model.dart';
 import '../../shared/models/procedure_model.dart';
 import 'procedure_semantic_theme.dart';
@@ -42,7 +41,7 @@ class ProcedurePageComposer {
           orElse: () => null,
         );
 
-    final isArabic = LanguageUtils.isArabic(procedure.summary.title);
+    final isArabic = locale == 'ar';
     final isEnterprise = profile == ProfileType.enterprise;
 
     final composed = <UiBlockModel>[
@@ -54,6 +53,7 @@ class ProcedurePageComposer {
           'semanticLabel': semanticTheme.label,
           'semanticIcon': semanticTheme.icon.codePoint,
           'semanticLayout': semanticTheme.layoutStyle,
+          'semanticLayoutLabel': _layoutLabel(semanticTheme.layoutStyle, locale),
           'semanticHint': semanticTheme.summaryHint,
           'title': _overviewTitle(locale, isEnterprise, isArabic),
           'summary': _overviewSummary(
@@ -113,6 +113,7 @@ class ProcedurePageComposer {
             'semanticLabel': semanticTheme.label,
             'semanticIcon': semanticTheme.icon.codePoint,
             'semanticLayout': semanticTheme.layoutStyle,
+            'semanticLayoutLabel': _layoutLabel(semanticTheme.layoutStyle, locale),
             'title': _actionGridTitle(locale, isEnterprise, isArabic),
             'subtitle': _actionGridSubtitle(
               isEnterprise: isEnterprise,
@@ -246,7 +247,7 @@ class ProcedurePageComposer {
     if (warningSection != null) {
       highlights.add(
         isArabic
-            ? 'تنبيهات avant action'
+            ? 'تنبيهات قبل الإجراء'
             : isEnterprise
                 ? 'Points de vigilance detectes'
                 : 'Conseils avant demarrage',
@@ -258,7 +259,7 @@ class ProcedurePageComposer {
           (stepperSection.block.data['steps'] as List<dynamic>? ?? []).length;
       highlights.add(
         isArabic
-            ? '$steps etapes'
+            ? '$steps خطوات'
             : '$steps ${steps > 1 ? 'etapes structurees' : 'etape structuree'}',
       );
     }
@@ -268,7 +269,7 @@ class ProcedurePageComposer {
           (checklistSection.block.data['items'] as List<dynamic>? ?? []).length;
       highlights.add(
         isArabic
-            ? '$items documents'
+            ? '$items وثائق'
             : '$items ${isEnterprise ? 'justificatifs a cadrer' : 'documents a prevoir'}',
       );
     }
@@ -278,7 +279,7 @@ class ProcedurePageComposer {
           (costSection.block.data['fees'] as List<dynamic>? ?? []).length;
       highlights.add(
         isArabic
-            ? '$fees frais'
+            ? '$fees رسوم'
             : '$fees ${isEnterprise ? 'postes de cout' : 'frais estimes'}',
       );
     }
@@ -286,7 +287,7 @@ class ProcedurePageComposer {
     if (officeSection != null) {
       highlights.add(
         isArabic
-            ? 'point de contact'
+            ? 'نقطة تواصل'
             : isEnterprise
                 ? 'Point de contact administratif'
                 : 'Guichet ou bureau a contacter',
@@ -315,7 +316,7 @@ class ProcedurePageComposer {
           : procedure.summary.title;
       return {
         'title': isArabic
-            ? 'Parcours'
+            ? 'المسار'
             : isEnterprise
                 ? 'Workflow'
                 : 'Parcours',
@@ -324,7 +325,7 @@ class ProcedurePageComposer {
         'tone': 'secondary',
         'items': [
           isArabic
-              ? '${steps.length} etapes'
+              ? '${steps.length} خطوات'
               : '${steps.length} ${steps.length > 1 ? 'etapes' : 'etape'}',
         ],
       };
@@ -337,17 +338,19 @@ class ProcedurePageComposer {
               .take(3);
       return {
         'title': isArabic
-            ? 'Documents'
+            ? 'الوثائق'
             : semanticTheme.id == 'legal_transfer'
                 ? 'Dossier juridique'
                 : isEnterprise
                     ? 'Documents'
                     : 'Pieces utiles',
-        'subtitle': semanticTheme.id == 'legal_transfer'
-            ? 'Pieces contractuelles et justificatifs de cession'
-            : isEnterprise
-                ? 'Elements a preparer pour le dossier'
-                : 'Pieces a reunir avant la visite',
+        'subtitle': isArabic
+            ? 'الوثائق المطلوب إعدادها قبل التوجه'
+            : semanticTheme.id == 'legal_transfer'
+                ? 'Pieces contractuelles et justificatifs de cession'
+                : isEnterprise
+                    ? 'Elements a preparer pour le dossier'
+                    : 'Pieces a reunir avant la visite',
         'icon': 'folder',
         'tone': 'primary',
         'items': items.map((item) => item['title']?.toString() ?? '').toList(),
@@ -362,13 +365,15 @@ class ProcedurePageComposer {
         'title': semanticTheme.id == 'acquisition'
             ? 'Budget d achat'
             : isArabic
-                ? 'Frais'
+                ? 'الرسوم'
                 : 'Budget',
-        'subtitle': semanticTheme.id == 'acquisition'
-            ? 'Montants d acquisition et de mise en circulation'
-            : isEnterprise
-                ? 'Vue des couts et postes administratifs'
-                : 'Montants et frais a prevoir',
+        'subtitle': isArabic
+            ? 'ملخص التكاليف والمبالغ التقديرية'
+            : semanticTheme.id == 'acquisition'
+                ? 'Montants d acquisition et de mise en circulation'
+                : isEnterprise
+                    ? 'Vue des couts et postes administratifs'
+                    : 'Montants et frais a prevoir',
         'icon': 'wallet',
         'tone': 'professional',
         'items': fees.map((item) => item['label']?.toString() ?? '').toList(),
@@ -381,15 +386,19 @@ class ProcedurePageComposer {
         'title': semanticTheme.id == 'acquisition'
             ? 'Fournisseur / guichet'
             : isArabic
-                ? 'Administration'
+                ? 'الإدارة'
                 : 'Guichet',
         'subtitle': officeSection.block.data['title']?.toString() ?? '',
         'icon': 'office',
         'tone': 'success',
         'items': [
           isEnterprise
-              ? 'Coordonnees et point de contact'
-              : 'Adresse et informations utiles',
+              ? (isArabic
+                  ? 'بيانات التواصل ونقطة الاتصال'
+                  : 'Coordonnees et point de contact')
+              : (isArabic
+                  ? 'العنوان والمعلومات المفيدة'
+                  : 'Adresse et informations utiles'),
         ],
       };
     }();
@@ -436,7 +445,7 @@ class ProcedurePageComposer {
     required ProcedureSemanticTheme semanticTheme,
   }) {
     if (isArabic) {
-      return 'تم إنشاء $cardCount blocs selon le type ${semanticTheme.label}.';
+      return 'تم إنشاء $cardCount عناصر وفق نوع ${semanticTheme.label}.';
     }
     return isEnterprise
         ? '$cardCount blocs generes avec une logique ${semanticTheme.label.toLowerCase()}.'
@@ -446,21 +455,53 @@ class ProcedurePageComposer {
   static String _metricLabel(String key, String locale, bool isArabic) {
     return switch (key) {
       'steps' => isArabic
-          ? 'Etapes'
+          ? 'الخطوات'
           : locale == 'en'
               ? 'Steps'
               : 'Etapes',
       'cost' => isArabic
-          ? 'Cout'
+          ? 'التكلفة'
           : locale == 'en'
               ? 'Cost'
               : 'Cout',
       'offices' => isArabic
-          ? 'Bureaux'
+          ? 'المكاتب'
           : locale == 'en'
               ? 'Offices'
               : 'Bureaux',
       _ => key,
+    };
+  }
+
+  static String _layoutLabel(String layout, String locale) {
+    final isArabic = locale == 'ar';
+    final isEnglish = locale == 'en';
+    return switch (layout) {
+      'featured_budget' => isArabic
+          ? 'ميزانية مبرزة'
+          : isEnglish
+              ? 'Featured budget'
+              : 'Budget mis en avant',
+      'dossier_first' => isArabic
+          ? 'الملف أولاً'
+          : isEnglish
+              ? 'Dossier first'
+              : 'Dossier en premier',
+      'compact_workflow' => isArabic
+          ? 'مسار مضغوط'
+          : isEnglish
+              ? 'Compact workflow'
+              : 'Workflow compact',
+      'dashboard_launch' => isArabic
+          ? 'لوحة قيادة'
+          : isEnglish
+              ? 'Control view'
+              : 'Pilotage',
+      _ => isArabic
+          ? 'عرض متوازن'
+          : isEnglish
+              ? 'Balanced view'
+              : 'Vue equilibree',
     };
   }
 }

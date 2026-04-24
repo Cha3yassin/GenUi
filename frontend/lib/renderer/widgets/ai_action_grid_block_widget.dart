@@ -20,6 +20,7 @@ class AiActionGridBlockWidget extends ConsumerWidget {
     final semanticId = data['semanticId'] as String? ?? 'general_admin';
     final semanticLabel = data['semanticLabel'] as String? ?? '';
     final semanticLayout = data['semanticLayout'] as String? ?? 'balanced';
+    final semanticLayoutLabel = data['semanticLayoutLabel'] as String?;
     final semanticStyle = _semanticStyle(semanticId);
 
     if (cards.isEmpty) {
@@ -56,7 +57,7 @@ class AiActionGridBlockWidget extends ConsumerWidget {
               border: semanticStyle.border,
             ),
             _SemanticChip(
-              label: _layoutLabel(semanticLayout),
+              label: semanticLayoutLabel ?? _layoutLabel(semanticLayout),
               background: semanticStyle.secondary.withValues(alpha: 0.10),
               foreground: semanticStyle.secondary,
               border: semanticStyle.border,

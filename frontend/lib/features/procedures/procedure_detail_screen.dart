@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/api_providers.dart';
-import '../../core/api/language_utils.dart';
 import '../../core/constants/route_paths.dart';
 import '../../core/genui/genui_providers.dart';
 import '../../core/genui/procedure_page_composer.dart';
@@ -30,14 +29,18 @@ class ProcedureDetailScreen extends ConsumerWidget {
     final profile = ref.watch(effectiveProfileProvider);
     final profileTheme = getThemeByProfile(profile);
     final locale = ref.watch(localeProvider);
-    final isArabic = LanguageUtils.isArabic(slug);
+    final isArabic = locale == 'ar';
     final textDirection = isArabic ? TextDirection.rtl : TextDirection.ltr;
 
     return Directionality(
       textDirection: textDirection,
       child: Scaffold(
         backgroundColor: profileTheme.pageBackground,
-        appBar: AppBar(title: Text(isArabic ? 'إجراء' : 'Procedure')),
+        appBar: AppBar(
+          title: Text(
+            isArabic ? 'إجراء' : locale == 'en' ? 'Procedure' : 'Procédure',
+          ),
+        ),
         body: SafeArea(
           child: AsyncValueWidget<ProcedureModel>(
             value: detailValue,
@@ -58,6 +61,7 @@ class ProcedureDetailScreen extends ConsumerWidget {
                   _ProcedureHero(
                     procedure: procedure,
                     isArabic: isArabic,
+                    locale: locale,
                     profile: profile,
                     theme: profileTheme,
                     semanticTheme: semanticTheme,
@@ -71,7 +75,11 @@ class ProcedureDetailScreen extends ConsumerWidget {
                     ),
                     icon: const Icon(Icons.near_me_rounded),
                     label: Text(
-                      isArabic ? 'اعثر على أقرب مكتب' : 'Find nearest office',
+                      isArabic
+                          ? 'اعثر على أقرب مكتب'
+                          : locale == 'en'
+                              ? 'Find nearest office'
+                              : 'Trouver le bureau le plus proche',
                     ),
                   ),
                 ],
@@ -88,6 +96,7 @@ class _ProcedureHero extends StatelessWidget {
   const _ProcedureHero({
     required this.procedure,
     required this.isArabic,
+    required this.locale,
     required this.profile,
     required this.theme,
     required this.semanticTheme,
@@ -95,6 +104,7 @@ class _ProcedureHero extends StatelessWidget {
 
   final ProcedureModel procedure;
   final bool isArabic;
+  final String locale;
   final ProfileType profile;
   final ProfileThemeData theme;
   final ProcedureSemanticTheme semanticTheme;
@@ -188,7 +198,11 @@ class _ProcedureHero extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        _heroSubtitle(isEnterprise, semanticTheme),
+                        _heroSubtitle(
+                          isEnterprise,
+                          semanticTheme,
+                          locale: locale,
+                        ),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: isEnterprise
                                   ? theme.heroMutedForeground
@@ -260,7 +274,9 @@ class _ProcedureHero extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _EnterpriseSignalTile(
-                      label: 'Mode GenUI',
+                      label: isArabic
+                          ? 'وضع GenUI'
+                          : 'Mode GenUI',
                       value: semanticTheme.label,
                       icon: Icons.verified_user_rounded,
                       color: semanticTheme.accent,
@@ -269,7 +285,7 @@ class _ProcedureHero extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: _EnterpriseSignalTile(
-                      label: 'Composition',
+                      label: isArabic ? 'التكوين' : 'Composition',
                       value: semanticTheme.summaryHint,
                       icon: Icons.domain_verification_rounded,
                       color: theme.professionalAccent,
@@ -288,8 +304,34 @@ class _ProcedureHero extends StatelessWidget {
 String _heroSubtitle(
   bool isEnterprise,
   ProcedureSemanticTheme semanticTheme,
+  {required String locale}
 ) {
+  final isArabic = locale == 'ar';
+  final isEnglish = locale == 'en';
+
   if (isEnterprise) {
+    if (isArabic) {
+      return switch (semanticTheme.id) {
+        'business_launch' => 'عرض تنفيذي لمرحلة الإطلاق والامتثال والتفعيل الإداري.',
+        'legal_transfer' => 'متابعة الملف التعاقدي ووثائق التحويل والمسار الإداري.',
+        'acquisition' => 'قراءة موجهة للميزانية والمزود وإتمام إجراءات الاستعمال.',
+        'renewal' => 'عرض تشغيلي للتجديد والإيداع والاستلام النهائي.',
+        _ => 'عرض تنفيذي للإجراء والتكاليف والتفاعل مع الإدارة.',
+      };
+    }
+    if (isEnglish) {
+      return switch (semanticTheme.id) {
+        'business_launch' =>
+          'Executive view of launch, compliance, and administrative activation.',
+        'legal_transfer' =>
+          'Contract-focused flow with transfer documents and admin path.',
+        'acquisition' =>
+          'Budget and supplier-focused view with road-readiness steps.',
+        'renewal' =>
+          'Operational view for renewal, submissions, and final pickup.',
+        _ => 'Executive overview of the procedure, costs, and admin touchpoints.',
+      };
+    }
     return switch (semanticTheme.id) {
       'business_launch' =>
         'Vue executive du lancement, de la conformite et des activations administratives.',
@@ -301,6 +343,29 @@ String _heroSubtitle(
         'Vue operationnelle du renouvellement, des depots et du retrait final.',
       _ =>
         'Vue executive de la formalite, des couts et des interactions administratives.',
+    };
+  }
+
+  if (isArabic) {
+    return switch (semanticTheme.id) {
+      'legal_transfer' => 'ملخص واضح لعملية النقل والوثائق التعاقدية والجهة المعنية.',
+      'acquisition' => 'ملخص واضح لعملية الشراء والرسوم والوثائق المطلوبة.',
+      'renewal' => 'ملخص واضح للتحديث والإيداع والاستلام النهائي.',
+      'business_launch' => 'عرض مبسط للتأسيس والتكاليف ومراحل الانطلاق.',
+      _ => 'ملخص واضح للإجراء والتكلفة والخطوات أمام الشباك.',
+    };
+  }
+  if (isEnglish) {
+    return switch (semanticTheme.id) {
+      'legal_transfer' =>
+        'Clear transfer summary with contractual documents and office guidance.',
+      'acquisition' =>
+        'Clear purchase summary with fees and required documents.',
+      'renewal' =>
+        'Clear update summary with submission and final pickup.',
+      'business_launch' =>
+        'Simplified launch view with costs and startup steps.',
+      _ => 'Clear overview of steps, costs, and office visit path.',
     };
   }
 

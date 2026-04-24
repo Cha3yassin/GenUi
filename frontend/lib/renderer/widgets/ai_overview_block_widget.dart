@@ -20,6 +20,7 @@ class AiOverviewBlockWidget extends ConsumerWidget {
     final semanticHint = data['semanticHint'] as String? ?? '';
     final semanticId = data['semanticId'] as String? ?? 'general_admin';
     final semanticLayout = data['semanticLayout'] as String? ?? 'balanced';
+    final semanticLayoutLabel = data['semanticLayoutLabel'] as String?;
     final semanticIconCode = data['semanticIcon'] as int?;
     final metrics = (data['metrics'] as List<dynamic>? ?? []).cast<Map>();
     final highlights =
@@ -96,7 +97,9 @@ class AiOverviewBlockWidget extends ConsumerWidget {
                             border: semanticStyle.border,
                           ),
                           _SemanticBadge(
-                            label: _layoutLabel(semanticLayout),
+                            label:
+                                semanticLayoutLabel ??
+                                _layoutLabel(semanticLayout),
                             background: semanticStyle.secondary.withValues(
                               alpha: 0.10,
                             ),

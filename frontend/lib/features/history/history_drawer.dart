@@ -26,8 +26,6 @@ class HistoryDrawer extends ConsumerWidget {
     final profileTheme = getThemeByProfile(profile);
     final isEnterprise = profile == ProfileType.enterprise;
 
-    ref.invalidate(historySummariesProvider);
-
     return Drawer(
       backgroundColor: profileTheme.pageBackground,
       child: SafeArea(

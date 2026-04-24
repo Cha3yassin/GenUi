@@ -12,6 +12,7 @@ import '../genui/category_config.dart';
 import '../genui/genui_providers.dart';
 import '../genui/profile_config.dart';
 import '../genui/procedure_config.dart';
+import '../locale/locale_provider.dart';
 import 'api_service.dart';
 import 'http_api_service.dart';
 import 'procedure_guide_adapter.dart';
@@ -35,6 +36,7 @@ final procedureDetailProvider = FutureProvider.family<ProcedureModel, String>((
   slug,
 ) async {
   final profile = ref.watch(effectiveProfileProvider);
+  final locale = ref.watch(localeProvider);
   final apiService = ref.watch(apiServiceProvider);
   final authState = ref.read(authProvider);
 
@@ -46,6 +48,7 @@ final procedureDetailProvider = FutureProvider.family<ProcedureModel, String>((
     slug,
     role: profileRole(profile),
     authToken: token,
+    language: locale,
   );
 });
 
@@ -89,6 +92,7 @@ final searchResultsProvider = FutureProvider<List<ProcedureSummaryModel>>((
 ) async {
   final query = ref.watch(searchQueryProvider);
   final profile = ref.watch(effectiveProfileProvider);
+  final locale = ref.watch(localeProvider);
 
   if (query.trim().length < 2) {
     return [];
@@ -99,13 +103,15 @@ final searchResultsProvider = FutureProvider<List<ProcedureSummaryModel>>((
     isCancelled = true;
   });
 
-  await Future<void>.delayed(const Duration(milliseconds: 400));
+  await Future<void>.delayed(const Duration(milliseconds: 180));
 
   if (isCancelled) {
     throw Exception('Search cancelled due to debounce');
   }
 
-  final results = await ref.watch(apiServiceProvider).searchProcedures(query);
+  final results = await ref
+      .watch(apiServiceProvider)
+      .searchProcedures(query, language: locale);
   return searchProcedures(results, query, profile);
 });
 
@@ -113,23 +119,28 @@ final searchResultsProvider = FutureProvider<List<ProcedureSummaryModel>>((
 final historySummariesProvider =
     FutureProvider<List<HistorySummary>>((ref) async {
   final authState = ref.watch(authProvider);
+  final locale = ref.watch(localeProvider);
   if (!authState.isAuthenticated) return [];
 
   final token = authState.user!.firebaseToken;
-  return ref.watch(apiServiceProvider).getHistorySummaries(token);
+  return ref
+      .watch(apiServiceProvider)
+      .getHistorySummaries(token, language: locale);
 });
 
 /// History detail — fetches full JSON for a past procedure, renders instantly.
 final historyDetailProvider =
     FutureProvider.family<ProcedureModel, String>((ref, historyId) async {
   final authState = ref.watch(authProvider);
+  final locale = ref.watch(localeProvider);
   if (!authState.isAuthenticated) {
     throw Exception('Not authenticated');
   }
 
   final token = authState.user!.firebaseToken;
-  final data =
-      await ref.watch(apiServiceProvider).getHistoryDetail(token, historyId);
+  final data = await ref
+      .watch(apiServiceProvider)
+      .getHistoryDetail(token, historyId, language: locale);
 
   // ai_response may come as a Map directly or as a JSON string
   final rawAiResponse = data['ai_response'];
@@ -145,6 +156,6 @@ final historyDetailProvider =
   return ProcedureGuideAdapter.fromJson(
     aiResponse,
     slug: 'history-$historyId',
-    language: 'fr',
+    language: locale,
   );
 });
