@@ -1,0 +1,51 @@
+# ============================================================
+# .dockerignore — Files excluded from Docker build context
+# ============================================================
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Development artifacts
+.env
+*.env
+*.log
+
+# ChromaDB data (re-indexed in container via ingest script)
+chroma_data/
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+*.pytest_cache
+
+# Version control
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+docs/
+
+# Firebase service account (injected via env var or volume mount)
+firebase_service_account.json
