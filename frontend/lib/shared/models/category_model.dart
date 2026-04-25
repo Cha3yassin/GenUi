@@ -58,6 +58,11 @@ class CategoryModel {
       'passport' => Icons.card_travel_rounded,
       'shield_check' => Icons.shield_rounded,
       'building_office' => Icons.apartment_rounded,
+      // Distinctive category icons
+      'balance' => Icons.balance_rounded, // Civil status / justice
+      'account_balance' => Icons.account_balance_rounded, // Taxation
+      'security' => Icons.security_rounded, // Social security
+      'real_estate' => Icons.real_estate_agent_rounded, // Property
       _ => Icons.article_rounded,
     };
   }

@@ -102,7 +102,7 @@ class HistoryDrawer extends ConsumerWidget {
                   ),
                   child: Text(
                     AppStrings.get(authState.user!.role, locale),
-                    style: GoogleFonts.dmSans(
+                    style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                       color: AppTheme.olive,
@@ -121,7 +121,7 @@ class HistoryDrawer extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
               child: Text(
                 AppStrings.get('history', locale).toUpperCase(),
-                style: GoogleFonts.dmSans(
+                style: GoogleFonts.plusJakartaSans(
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
                   color: AppTheme.mutedInk.withOpacity(0.5),
@@ -190,7 +190,7 @@ class _DrawerAction extends StatelessWidget {
         leading: Icon(icon, size: 20, color: color),
         title: Text(
           label,
-          style: GoogleFonts.dmSans(
+          style: GoogleFonts.plusJakartaSans(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             color: color,
@@ -230,11 +230,7 @@ class _SignInPrompt extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              locale == 'ar'
-                  ? 'سجّل دخولك لرؤية السجل'
-                  : locale == 'en'
-                      ? 'Sign in to view your history'
-                      : 'Connectez-vous pour voir l\'historique',
+              AppStrings.get('sign_in_for_history', locale),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppTheme.mutedInk.withOpacity(0.6),
                   ),

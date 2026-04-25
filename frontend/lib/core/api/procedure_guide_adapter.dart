@@ -30,9 +30,9 @@ class ProcedureGuideAdapter {
       id: slug,
       slug: slug,
       title: title,
-      summary: labels.generatedSummary,
-      categoryId: 'ai-generated',
-      categoryLabel: labels.assistant,
+      summary: labels.guideSummary,
+      categoryId: 'general',
+      categoryLabel: labels.guide,
       estimatedDuration: labels.variable,
       estimatedCost: estimatedCost,
       officesToVisit: 1,
@@ -73,7 +73,7 @@ class ProcedureGuideAdapter {
           'description': stepMap['description']?.toString() ?? '',
           'officeType': stepMap['location']?.toString() ?? '',
           'isCompleted': false,
-          'isCurrent': stepMap['number'] == 1,
+          'isCurrent': false,
         };
       }).toList();
 
@@ -82,7 +82,6 @@ class ProcedureGuideAdapter {
           type: 'stepper',
           data: {
             'steps': stepperSteps,
-            'currentLabel': labels.current,
           },
         ),
       );
@@ -187,9 +186,9 @@ class ProcedureGuideAdapter {
     if (language == 'ar') {
       return const _ProcedureLabels(
         fallbackTitle: 'إجراء إداري',
-        generatedSummary:
-            'دليل مولد بالذكاء الاصطناعي من Fbureaucracy اعتمادا على المعلومات الإدارية.',
-        assistant: 'المساعد',
+        guideSummary:
+            'دليل مبني على المعلومات الإدارية الرسمية.',
+        guide: 'دليل',
         variable: 'متغير',
         beforeStart: 'قبل أن تبدأ',
         stepsTitle: 'خطوات الإجراء',
@@ -206,16 +205,15 @@ class ProcedureGuideAdapter {
         address: 'العنوان',
         hours: 'التوقيت',
         phone: 'الهاتف',
-        current: 'الحالية',
       );
     }
 
     if (language == 'en') {
       return const _ProcedureLabels(
         fallbackTitle: 'Administrative Procedure',
-        generatedSummary:
-            'AI-generated guide by Fbureaucracy based on administrative information.',
-        assistant: 'Assistant',
+        guideSummary:
+            'Guide based on official administrative information.',
+        guide: 'Guide',
         variable: 'Variable',
         beforeStart: 'Before you begin',
         stepsTitle: 'Procedure Steps',
@@ -232,15 +230,14 @@ class ProcedureGuideAdapter {
         address: 'Address',
         hours: 'Hours',
         phone: 'Phone',
-        current: 'Current',
       );
     }
 
     return const _ProcedureLabels(
       fallbackTitle: 'Procédure Administrative',
-      generatedSummary:
-          "Guide généré par l'IA de Fbureaucracy basé sur les informations administratives.",
-      assistant: 'Assistant',
+      guideSummary:
+          "Guide basé sur les informations administratives officielles.",
+      guide: 'Guide',
       variable: 'Variable',
       beforeStart: 'Avant de commencer',
       stepsTitle: 'Étapes de la procédure',
@@ -257,7 +254,6 @@ class ProcedureGuideAdapter {
       address: 'Adresse',
       hours: 'Horaires',
       phone: 'Téléphone',
-      current: 'En cours',
     );
   }
 }
@@ -265,8 +261,8 @@ class ProcedureGuideAdapter {
 class _ProcedureLabels {
   const _ProcedureLabels({
     required this.fallbackTitle,
-    required this.generatedSummary,
-    required this.assistant,
+    required this.guideSummary,
+    required this.guide,
     required this.variable,
     required this.beforeStart,
     required this.stepsTitle,
@@ -283,12 +279,11 @@ class _ProcedureLabels {
     required this.address,
     required this.hours,
     required this.phone,
-    required this.current,
   });
 
   final String fallbackTitle;
-  final String generatedSummary;
-  final String assistant;
+  final String guideSummary;
+  final String guide;
   final String variable;
   final String beforeStart;
   final String stepsTitle;
@@ -305,5 +300,4 @@ class _ProcedureLabels {
   final String address;
   final String hours;
   final String phone;
-  final String current;
 }

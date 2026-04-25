@@ -4,10 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/category_procedures_data.dart';
 import '../../core/theme/app_theme.dart';
 import '../models/category_model.dart';
+import 'press_scale.dart';
 
 /// Compact category card with embedded procedure mini-chips.
 /// Tapping the card → navigates to category procedures list.
-/// Tapping a chip → navigates directly to that procedure (GenUI).
+/// Tapping a chip → navigates directly to that procedure.
 class CategoryCard extends StatelessWidget {
   const CategoryCard({
     required this.category,
@@ -30,37 +31,38 @@ class CategoryCard extends StatelessWidget {
     // Show max 3 procedure chips
     final visibleProcedures = procedures.take(3).toList();
 
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
+    return PressScale(
+      onTap: onTap,
+      child: Card(
+        child: InkWell(
+          onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
             children: [
               // ── Icon + Title row ──────────────────────────────────
               Row(
                 children: [
                   Container(
-                    width: 36,
-                    height: 36,
+                    width: 48,
+                    height: 48,
                     decoration: BoxDecoration(
-                      color: category.accentColor.withOpacity(0.10),
-                      borderRadius: BorderRadius.circular(11),
+                      color: category.accentColor.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     child: Icon(
                       category.icon,
                       color: category.accentColor,
-                      size: 18,
+                      size: 24,
                     ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       category.title(locale),
-                      style: GoogleFonts.dmSans(
+                      style: GoogleFonts.plusJakartaSans(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: AppTheme.ink,
@@ -75,27 +77,32 @@ class CategoryCard extends StatelessWidget {
               if (visibleProcedures.isNotEmpty) ...[
                 const SizedBox(height: 10),
                 // ── Mini procedure chips ────────────────────────────
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: visibleProcedures.map((proc) {
-                    final name = CategoryProceduresData.localizedName(
-                      proc,
-                      locale,
-                    );
-                    return _MiniChip(
-                      label: name,
-                      color: category.accentColor,
-                      onTap: () =>
-                          onProcedureTap(proc['slug'] as String),
-                    );
-                  }).toList(),
+                Expanded(
+                  child: ClipRect(
+                    child: Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: visibleProcedures.map((proc) {
+                        final name = CategoryProceduresData.localizedName(
+                          proc,
+                          locale,
+                        );
+                        return _MiniChip(
+                          label: name,
+                          color: category.accentColor,
+                          onTap: () =>
+                              onProcedureTap(proc['slug'] as String),
+                        );
+                      }).toList(),
+                    ),
+                  ),
                 ),
               ],
             ],
           ),
         ),
       ),
+    ),
     );
   }
 }
@@ -128,7 +135,7 @@ class _MiniChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: GoogleFonts.dmSans(
+          style: GoogleFonts.plusJakartaSans(
             fontSize: 11,
             fontWeight: FontWeight.w600,
             color: color.withOpacity(0.8),

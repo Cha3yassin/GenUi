@@ -19,7 +19,7 @@ class MockApiService implements ApiService {
   }
 
   @override
-  Future<List<ProcedureSummaryModel>> searchProcedures(String query) async {
+  Future<List<ProcedureSummaryModel>> searchProcedures(String query, {String? language}) async {
     await Future<void>.delayed(_networkDelay);
     final normalized = query.trim().toLowerCase();
     final procedures = _procedureSummariesJson
@@ -53,7 +53,7 @@ class MockApiService implements ApiService {
   }
 
   @override
-  Future<ProcedureModel> getProcedureDetail(String slug, {String? role, String? authToken}) async {
+  Future<ProcedureModel> getProcedureDetail(String slug, {String? role, String? authToken, String? language}) async {
     await Future<void>.delayed(_networkDelay);
     final detail =
         _procedureDetailsJson[slug] ?? _procedureDetailsJson.values.first;

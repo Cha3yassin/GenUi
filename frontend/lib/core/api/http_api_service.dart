@@ -145,15 +145,16 @@ class HttpApiService implements ApiService {
   // ── Search ─────────────────────────────────────────────────────────────────
 
   @override
-  Future<List<ProcedureSummaryModel>> searchProcedures(String query) async {
+  Future<List<ProcedureSummaryModel>> searchProcedures(String query, {String? language}) async {
     if (query.trim().length < 2) return [];
 
     try {
+      final lang = language ?? LanguageUtils.preferredLanguageFor(query);
       final data = await _get(
         '/procedures/search',
         queryParameters: {
           'q': query,
-          'language': LanguageUtils.preferredLanguageFor(query),
+          'language': lang,
         },
       );
       return (data as List)
@@ -189,15 +190,15 @@ class HttpApiService implements ApiService {
   // ── GenUI with polling ─────────────────────────────────────────────────────
 
   @override
-  Future<ProcedureModel> getProcedureDetail(String slug, {String? role, String? authToken}) async {
+  Future<ProcedureModel> getProcedureDetail(String slug, {String? role, String? authToken, String? language}) async {
     final message = slug.replaceAll('-', ' ');
-    final language = LanguageUtils.preferredLanguageFor(message);
+    final lang = language ?? LanguageUtils.preferredLanguageFor(message);
 
     try {
       final uri = Uri.parse('${AppConfig.apiV1}/gen-ui/search');
       final body = <String, dynamic>{
         'message': message,
-        'language': language,
+        'language': lang,
       };
       if (role != null) body['role'] = role;
 
@@ -224,7 +225,7 @@ class HttpApiService implements ApiService {
         return ProcedureGuideAdapter.fromJson(
           rawJson,
           slug: slug,
-          language: language,
+          language: lang,
         );
       }
 
@@ -232,7 +233,7 @@ class HttpApiService implements ApiService {
           decoded is Map<String, dynamic> &&
           decoded['task_id'] != null) {
         final taskId = decoded['task_id'] as String;
-        return _pollForResult(taskId, slug, language, authToken: authToken);
+        return _pollForResult(taskId, slug, lang, authToken: authToken);
       }
 
       throw ApiException(

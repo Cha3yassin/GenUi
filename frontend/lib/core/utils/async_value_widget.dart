@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../shared/widgets/skeleton_loader.dart';
+
 class AsyncValueWidget<T> extends StatelessWidget {
   const AsyncValueWidget({required this.value, required this.data, super.key});
 
@@ -11,7 +13,16 @@ class AsyncValueWidget<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return value.when(
       data: data,
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Column(
+          children: const [
+            SkeletonCard(height: 100),
+            SizedBox(height: 12),
+            SkeletonCard(height: 80),
+          ],
+        ),
+      ),
       error: (error, stackTrace) {
         // Skip showing debounce cancellation errors
         if (error.toString().contains('Search cancelled')) {
@@ -30,7 +41,7 @@ class AsyncValueWidget<T> extends StatelessWidget {
                 const Icon(Icons.warning_amber_rounded, size: 56, color: Colors.orangeAccent),
                 const SizedBox(height: 16),
                 Text(
-                  message.isNotEmpty ? message : 'Une erreur est survenue. L\'IA est peut-être surchargée.',
+                  message.isNotEmpty ? message : 'Une erreur est survenue.',
                   style: Theme.of(context).textTheme.bodyLarge,
                   textAlign: TextAlign.center,
                 ),

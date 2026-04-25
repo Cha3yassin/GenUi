@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/api/language_utils.dart';
+import '../../core/locale/app_strings.dart';
 import '../models/procedure_summary_model.dart';
 import 'status_badge.dart';
 
@@ -8,20 +9,22 @@ class ProcedureCard extends StatelessWidget {
   const ProcedureCard({
     required this.procedure,
     required this.onTap,
+    this.locale = 'fr',
     super.key,
   });
 
   final ProcedureSummaryModel procedure;
   final VoidCallback onTap;
+  final String locale;
 
   @override
   Widget build(BuildContext context) {
-    final isArabic = LanguageUtils.isArabic(procedure.title);
+    final isArabic = locale == 'ar' || LanguageUtils.isArabic(procedure.title);
 
     return Card(
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(18),
           child: Directionality(
@@ -55,9 +58,8 @@ class ProcedureCard extends StatelessWidget {
                     ),
                     _MetaPill(
                       icon: Icons.account_balance_rounded,
-                      label: isArabic
-                          ? '${procedure.officesToVisit} مكاتب'
-                          : '${procedure.officesToVisit} offices',
+                      label:
+                          '${procedure.officesToVisit} ${AppStrings.get('offices_label', locale)}',
                     ),
                   ],
                 ),

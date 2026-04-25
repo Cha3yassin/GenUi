@@ -7,13 +7,13 @@ import '../../shared/models/procedure_summary_model.dart';
 abstract class ApiService {
   Future<List<CategoryModel>> getCategories({String? role});
 
-  Future<List<ProcedureSummaryModel>> searchProcedures(String query);
+  Future<List<ProcedureSummaryModel>> searchProcedures(String query, {String? language});
 
   Future<List<ProcedureSummaryModel>> getProceduresByCategory(
     String categoryId,
   );
 
-  Future<ProcedureModel> getProcedureDetail(String slug, {String? role, String? authToken});
+  Future<ProcedureModel> getProcedureDetail(String slug, {String? role, String? authToken, String? language});
 
   Future<List<OfficeModel>> getNearbyOffices({
     String? stepId,

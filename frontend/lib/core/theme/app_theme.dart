@@ -7,18 +7,57 @@ class AppTheme {
   const AppTheme._();
 
   // ── Brand Colors ────────────────────────────────────────────────────────────
-  static const Color terracotta = Color(0xFFB45745);
-  static const Color deepTerracotta = Color(0xFF843B31);
-  static const Color warmCoral = Color(0xFFD4715E);
-  static const Color sand = Color(0xFFF5EFE7);
-  static const Color paper = Color(0xFFFFFBF6);
-  static const Color cream = Color(0xFFFFF8F0);
-  static const Color ink = Color(0xFF1A1614);
-  static const Color mutedInk = Color(0xFF6F625D);
-  static const Color olive = Color(0xFF5E7049);
-  static const Color softOlive = Color(0xFF8A9A72);
-  static const Color borderLight = Color(0xFFE8DFD6);
-  static const Color surfaceTint = Color(0xFFFFF0EA);
+  static const Color terracotta = Color(0xFF1B3A4B);     // Deep navy-slate (primary)
+  static const Color deepTerracotta = Color(0xFF0F2634);  // Darker shade
+  static const Color warmCoral = Color(0xFF2E6B7B);       // Teal accent
+  static const Color sand = Color(0xFFF4F5F7);            // Light professional grey
+  static const Color paper = Color(0xFFFFFFFF);            // Pure white cards
+  static const Color cream = Color(0xFFF8F9FA);            // Subtle off-white
+  static const Color ink = Color(0xFF1A1D21);              // Near-black text
+  static const Color mutedInk = Color(0xFF5F6B7A);         // Muted blue-grey
+  static const Color olive = Color(0xFF2D7D6F);            // Professional teal-green
+  static const Color softOlive = Color(0xFF5BA08F);        // Lighter teal
+  static const Color borderLight = Color(0xFFE2E5EA);      // Clean grey border
+  static const Color surfaceTint = Color(0xFFEDF3F5);      // Light blue tint
+
+  // ── Role palettes ───────────────────────────────────────────────────────────
+  /// Warm palette for Individual role
+  static const Color individualAccent = Color(0xFF2E6B7B);
+  static const Color individualBg = Color(0xFFF0F7F9);
+
+  /// Professional palette for Enterprise role
+  static const Color enterpriseAccent = Color(0xFF1B3A4B);
+  static const Color enterpriseBg = Color(0xFFF0F2F5);
+
+  // ── Enterprise action card colors ──────────────────────────────────────────
+  static const Color darkNavy = Color(0xFF1B2A4A);
+  static const Color actionYellow = Color(0xFFD4A017);
+  static const Color actionBlue = Color(0xFF2E6B8A);
+  static const Color actionGreen = Color(0xFF2D7D6F);
+  static const Color actionOrange = Color(0xFFCC6B2C);
+
+  // ── Category-specific design colors ─────────────────────────────────────────
+  static const Map<String, Color> categoryColors = {
+    'civil_status': Color(0xFF3D6B7E),     // Steel blue
+    'vehicles': Color(0xFF4A7C59),          // Forest green
+    'taxation': Color(0xFF8B6914),          // Amber/gold
+    'residence': Color(0xFF5A6E77),         // Slate grey
+    'passports_travel': Color(0xFF5B4A8A),  // Royal purple
+    'business': Color(0xFF1B3A4B),          // Deep navy
+    'social_security': Color(0xFF2D7D6F),   // Teal
+    'property': Color(0xFF7A5C3D),          // Warm brown
+  };
+
+  static const Map<String, IconData> categoryIcons = {
+    'civil_status': Icons.balance_rounded,
+    'vehicles': Icons.directions_car_rounded,
+    'taxation': Icons.account_balance_rounded,
+    'residence': Icons.home_work_rounded,
+    'passports_travel': Icons.card_travel_rounded,
+    'business': Icons.business_center_rounded,
+    'social_security': Icons.shield_rounded,
+    'property': Icons.apartment_rounded,
+  };
 
   // ── Light Theme ─────────────────────────────────────────────────────────────
   static ThemeData light() {
@@ -30,7 +69,7 @@ class AppTheme {
       surface: paper,
     );
 
-    final baseTextTheme = GoogleFonts.dmSansTextTheme();
+    final baseTextTheme = GoogleFonts.plusJakartaSansTextTheme();
 
     return ThemeData(
       useMaterial3: true,
@@ -53,7 +92,7 @@ class AppTheme {
         scrolledUnderElevation: 0,
         backgroundColor: sand,
         foregroundColor: ink,
-        titleTextStyle: GoogleFonts.dmSans(
+        titleTextStyle: GoogleFonts.plusJakartaSans(
           fontSize: 18,
           fontWeight: FontWeight.w700,
           color: ink,
@@ -64,7 +103,7 @@ class AppTheme {
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: borderLight),
         ),
       ),
@@ -83,7 +122,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          textStyle: GoogleFonts.dmSans(
+          textStyle: GoogleFonts.plusJakartaSans(
             fontSize: 15,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.2,
@@ -98,7 +137,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          textStyle: GoogleFonts.dmSans(
+          textStyle: GoogleFonts.plusJakartaSans(
             fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
@@ -107,7 +146,7 @@ class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: terracotta,
-          textStyle: GoogleFonts.dmSans(
+          textStyle: GoogleFonts.plusJakartaSans(
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
@@ -118,7 +157,7 @@ class AppTheme {
         fillColor: Colors.white,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        hintStyle: GoogleFonts.dmSans(
+        hintStyle: GoogleFonts.plusJakartaSans(
           fontSize: 14,
           color: mutedInk.withOpacity(0.6),
         ),
@@ -176,49 +215,49 @@ class AppTheme {
         letterSpacing: -0.4,
         color: ink,
       ),
-      titleLarge: GoogleFonts.dmSans(
+      titleLarge: GoogleFonts.plusJakartaSans(
         fontSize: 22,
         height: 1.22,
         fontWeight: FontWeight.w800,
         color: ink,
       ),
-      titleMedium: GoogleFonts.dmSans(
+      titleMedium: GoogleFonts.plusJakartaSans(
         fontSize: 17,
         height: 1.3,
         fontWeight: FontWeight.w700,
         color: ink,
       ),
-      titleSmall: GoogleFonts.dmSans(
+      titleSmall: GoogleFonts.plusJakartaSans(
         fontSize: 15,
         height: 1.25,
         fontWeight: FontWeight.w700,
         color: ink,
       ),
-      bodyLarge: GoogleFonts.dmSans(
+      bodyLarge: GoogleFonts.plusJakartaSans(
         fontSize: 16,
         height: 1.55,
         fontWeight: FontWeight.w400,
         color: mutedInk,
       ),
-      bodyMedium: GoogleFonts.dmSans(
+      bodyMedium: GoogleFonts.plusJakartaSans(
         fontSize: 14,
         height: 1.5,
         fontWeight: FontWeight.w400,
         color: mutedInk,
       ),
-      bodySmall: GoogleFonts.dmSans(
+      bodySmall: GoogleFonts.plusJakartaSans(
         fontSize: 12,
         height: 1.45,
         fontWeight: FontWeight.w400,
         color: mutedInk,
       ),
-      labelLarge: GoogleFonts.dmSans(
+      labelLarge: GoogleFonts.plusJakartaSans(
         fontSize: 13,
         height: 1.2,
         fontWeight: FontWeight.w700,
         color: ink,
       ),
-      labelSmall: GoogleFonts.dmSans(
+      labelSmall: GoogleFonts.plusJakartaSans(
         fontSize: 11,
         height: 1.2,
         fontWeight: FontWeight.w500,

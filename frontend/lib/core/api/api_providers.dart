@@ -8,6 +8,7 @@ import '../../shared/models/office_model.dart';
 import '../../shared/models/procedure_model.dart';
 import '../../shared/models/procedure_summary_model.dart';
 import '../auth/auth_provider.dart';
+import '../locale/locale_provider.dart';
 import 'api_service.dart';
 import 'http_api_service.dart';
 import 'procedure_guide_adapter.dart';
@@ -28,13 +29,14 @@ final procedureDetailProvider = FutureProvider.family<ProcedureModel, String>((
   slug,
 ) async {
   final role = ref.watch(userRoleProvider);
+  final locale = ref.watch(localeProvider);
   final apiService = ref.watch(apiServiceProvider);
   final authState = ref.read(authProvider);
 
   // Pass auth token so the API service can save to history (fire-and-forget)
   final token = authState.isAuthenticated ? authState.user!.firebaseToken : null;
 
-  return apiService.getProcedureDetail(slug, role: role, authToken: token);
+  return apiService.getProcedureDetail(slug, role: role, authToken: token, language: locale);
 });
 
 final categoryProceduresProvider =
@@ -76,6 +78,7 @@ final searchResultsProvider = FutureProvider<List<ProcedureSummaryModel>>((
   ref,
 ) async {
   final query = ref.watch(searchQueryProvider);
+  final locale = ref.watch(localeProvider);
 
   if (query.trim().length < 2) {
     return [];
@@ -92,7 +95,7 @@ final searchResultsProvider = FutureProvider<List<ProcedureSummaryModel>>((
     throw Exception('Search cancelled due to debounce');
   }
 
-  return ref.watch(apiServiceProvider).searchProcedures(query);
+  return ref.watch(apiServiceProvider).searchProcedures(query, language: locale);
 });
 
 /// History summaries for the drawer (requires auth).
@@ -108,6 +111,7 @@ final historySummariesProvider = FutureProvider<List<HistorySummary>>((ref) asyn
 final historyDetailProvider =
     FutureProvider.family<ProcedureModel, String>((ref, historyId) async {
   final authState = ref.watch(authProvider);
+  final locale = ref.watch(localeProvider);
   if (!authState.isAuthenticated) {
     throw Exception('Not authenticated');
   }
@@ -129,6 +133,6 @@ final historyDetailProvider =
   return ProcedureGuideAdapter.fromJson(
     aiResponse,
     slug: 'history-$historyId',
-    language: 'fr',
+    language: locale,
   );
 });
