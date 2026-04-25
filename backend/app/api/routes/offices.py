@@ -2,15 +2,13 @@
 api/routes/offices.py - Public office location endpoints.
 """
 
+import re
 from math import asin, cos, radians, sin, sqrt
 from typing import Optional
 
 from fastapi import APIRouter, Query
 
 router = APIRouter(prefix="/offices", tags=["Offices"])
-
-_DEFAULT_LAT = 36.8065
-_DEFAULT_LNG = 10.1815
 
 _OFFICES = [
     {
@@ -79,6 +77,182 @@ _OFFICES = [
         "lng": 10.1710,
         "keywords": ["property", "immobilier", "cadastre", "titre foncier"],
     },
+    {
+        "id": "rne-sfax",
+        "name": "Registre National des Entreprises - Sfax",
+        "type": "Entreprises",
+        "address": "Route de Gremda, Sfax",
+        "workingHours": "Lun-Ven 08:30 - 16:30",
+        "isOpen": True,
+        "lat": 34.7398,
+        "lng": 10.7600,
+        "keywords": ["business", "entreprise", "rne", "registre", "company"],
+    },
+    {
+        "id": "recette-finances-sousse",
+        "name": "Recette des Finances - Sousse",
+        "type": "Fiscalité",
+        "address": "Avenue Habib Bourguiba, Sousse",
+        "workingHours": "Lun-Ven 08:00 - 14:00",
+        "isOpen": True,
+        "lat": 35.8288,
+        "lng": 10.6403,
+        "keywords": ["taxation", "fiscalité", "impot", "taxe", "timbre", "tva"],
+    },
+    {
+        "id": "cnss-sousse",
+        "name": "CNSS - Bureau régional Sousse",
+        "type": "Sécurité Sociale",
+        "address": "Boulevard du 14 Janvier, Sousse",
+        "workingHours": "Lun-Ven 08:00 - 14:00",
+        "isOpen": True,
+        "lat": 35.8308,
+        "lng": 10.6387,
+        "keywords": ["social_security", "cnss", "sécurité sociale", "cnam", "retraite"],
+    },
+    {
+        "id": "municipalite-nabeul",
+        "name": "Municipalité de Nabeul - État civil",
+        "type": "État Civil",
+        "address": "Avenue Habib Thameur, Nabeul",
+        "workingHours": "Lun-Ven 08:00 - 14:00",
+        "isOpen": True,
+        "lat": 36.4540,
+        "lng": 10.7350,
+        "keywords": ["civil_status", "naissance", "cin", "passeport", "etat civil"],
+    },
+    {
+        "id": "attt-sfax",
+        "name": "ATTT - Centre de visite technique Sfax",
+        "type": "Véhicules",
+        "address": "Route de l'Aéroport, Sfax",
+        "workingHours": "Lun-Ven 08:00 - 16:30",
+        "isOpen": True,
+        "lat": 34.7431,
+        "lng": 10.7580,
+        "keywords": ["vehicles", "car", "voiture", "carte grise", "permis", "mutation"],
+    },
+    {
+        "id": "attt-sousse",
+        "name": "ATTT - Centre de visite technique Sousse",
+        "type": "Véhicules",
+        "address": "Route de Monastir, Sousse",
+        "workingHours": "Lun-Ven 08:00 - 16:30",
+        "isOpen": True,
+        "lat": 35.8382,
+        "lng": 10.6259,
+        "keywords": ["vehicles", "car", "voiture", "carte grise", "permis", "mutation"],
+    },
+    {
+        "id": "attt-gabes",
+        "name": "ATTT - Centre de visite technique Gabès",
+        "type": "Véhicules",
+        "address": "Avenue de l'Environnement, Gabès",
+        "workingHours": "Lun-Ven 08:00 - 16:30",
+        "isOpen": True,
+        "lat": 33.8886,
+        "lng": 10.0982,
+        "keywords": ["vehicles", "car", "voiture", "carte grise", "permis", "mutation"],
+    },
+    {
+        "id": "municipalite-sfax",
+        "name": "Municipalité de Sfax - État civil",
+        "type": "État Civil",
+        "address": "Place de la Municipalité, Sfax",
+        "workingHours": "Lun-Ven 08:00 - 14:00",
+        "isOpen": True,
+        "lat": 34.7410,
+        "lng": 10.7603,
+        "keywords": ["civil_status", "naissance", "cin", "passeport", "etat civil"],
+    },
+    {
+        "id": "municipalite-sousse",
+        "name": "Municipalité de Sousse - État civil",
+        "type": "État Civil",
+        "address": "Rue de la Kasbah, Sousse",
+        "workingHours": "Lun-Ven 08:00 - 14:00",
+        "isOpen": True,
+        "lat": 35.8256,
+        "lng": 10.6369,
+        "keywords": ["civil_status", "naissance", "cin", "passeport", "etat civil"],
+    },
+    {
+        "id": "rne-sousse",
+        "name": "Registre National des Entreprises - Sousse",
+        "type": "Entreprises",
+        "address": "Avenue Yasser Arafat, Sousse",
+        "workingHours": "Lun-Ven 08:30 - 16:30",
+        "isOpen": True,
+        "lat": 35.8394,
+        "lng": 10.6316,
+        "keywords": ["business", "entreprise", "rne", "registre", "company"],
+    },
+    {
+        "id": "rne-gabes",
+        "name": "Registre National des Entreprises - Gabès",
+        "type": "Entreprises",
+        "address": "Avenue Habib Thameur, Gabès",
+        "workingHours": "Lun-Ven 08:30 - 16:30",
+        "isOpen": True,
+        "lat": 33.8815,
+        "lng": 10.1059,
+        "keywords": ["business", "entreprise", "rne", "registre", "company"],
+    },
+    {
+        "id": "recette-finances-sfax",
+        "name": "Recette des Finances - Sfax",
+        "type": "Fiscalité",
+        "address": "Avenue Hédi Chaker, Sfax",
+        "workingHours": "Lun-Ven 08:00 - 14:00",
+        "isOpen": True,
+        "lat": 34.7372,
+        "lng": 10.7530,
+        "keywords": ["taxation", "fiscalité", "impot", "taxe", "timbre", "tva"],
+    },
+    {
+        "id": "recette-finances-gafsa",
+        "name": "Recette des Finances - Gafsa",
+        "type": "Fiscalité",
+        "address": "Avenue de la Liberté, Gafsa",
+        "workingHours": "Lun-Ven 08:00 - 14:00",
+        "isOpen": True,
+        "lat": 34.4250,
+        "lng": 8.7842,
+        "keywords": ["taxation", "fiscalité", "impot", "taxe", "timbre", "tva"],
+    },
+    {
+        "id": "cnss-sfax",
+        "name": "CNSS - Bureau régional Sfax",
+        "type": "Sécurité Sociale",
+        "address": "Avenue Majida Boulila, Sfax",
+        "workingHours": "Lun-Ven 08:00 - 14:00",
+        "isOpen": True,
+        "lat": 34.7443,
+        "lng": 10.7546,
+        "keywords": ["social_security", "cnss", "sécurité sociale", "cnam", "retraite"],
+    },
+    {
+        "id": "cnss-gabes",
+        "name": "CNSS - Bureau régional Gabès",
+        "type": "Sécurité Sociale",
+        "address": "Avenue de l'Indépendance, Gabès",
+        "workingHours": "Lun-Ven 08:00 - 14:00",
+        "isOpen": True,
+        "lat": 33.8921,
+        "lng": 10.1025,
+        "keywords": ["social_security", "cnss", "sécurité sociale", "cnam", "retraite"],
+    },
+    {
+        "id": "office-topographie-sfax",
+        "name": "Office de la Topographie et du Cadastre - Sfax",
+        "type": "Immobilier",
+        "address": "Route de Mahdia, Sfax",
+        "workingHours": "Lun-Ven 08:00 - 14:00",
+        "isOpen": True,
+        "lat": 34.7523,
+        "lng": 10.7725,
+        "keywords": ["property", "immobilier", "cadastre", "titre foncier"],
+    },
 ]
 
 
@@ -88,10 +262,26 @@ async def nearby_offices(
     lat: Optional[float] = Query(default=None, ge=-90, le=90),
     lng: Optional[float] = Query(default=None, ge=-180, le=180),
 ) -> list[dict]:
-    origin_lat = lat if lat is not None else _DEFAULT_LAT
-    origin_lng = lng if lng is not None else _DEFAULT_LNG
-
     offices = _filter_offices(stepId)
+    if lat is None or lng is None:
+        # No user location yet: return a diversified nationwide sample
+        return [
+            {
+                "id": office["id"],
+                "name": office["name"],
+                "type": office["type"],
+                "address": office["address"],
+                "workingHours": office["workingHours"],
+                "isOpen": office["isOpen"],
+                "lat": office["lat"],
+                "lng": office["lng"],
+                "distance": "--",
+            }
+            for office in offices[:12]
+        ]
+
+    origin_lat = lat
+    origin_lng = lng
     enriched = []
     for office in offices:
         distance_km = _distance_km(origin_lat, origin_lng, office["lat"], office["lng"])
@@ -117,12 +307,39 @@ def _filter_offices(step_id: Optional[str]) -> list[dict]:
         return _OFFICES
 
     needle = step_id.lower().replace("-", " ").replace("_", " ")
-    matches = [
-        office
-        for office in _OFFICES
-        if any(keyword.lower() in needle or needle in keyword.lower() for keyword in office["keywords"])
-    ]
-    return matches or _OFFICES
+    need_tokens = _normalise_tokens(needle)
+    if not need_tokens:
+        return _OFFICES
+
+    matches = []
+    for office in _OFFICES:
+        score = _keyword_match_score(need_tokens, office["keywords"])
+        if score > 0:
+            matches.append((score, office))
+
+    matches.sort(key=lambda item: item[0], reverse=True)
+    top_matches = [office for _, office in matches]
+    return top_matches or _OFFICES
+
+
+def _normalise_tokens(text: str) -> set[str]:
+    cleaned = re.sub(r"[^a-z0-9\u0600-\u06FF]+", " ", text.lower())
+    return {token for token in cleaned.split() if len(token) >= 3}
+
+
+def _keyword_match_score(need_tokens: set[str], keywords: list[str]) -> int:
+    score = 0
+    for keyword in keywords:
+        keyword_tokens = _normalise_tokens(keyword)
+        if not keyword_tokens:
+            continue
+        shared = need_tokens.intersection(keyword_tokens)
+        if shared:
+            score += len(shared) * 3
+        for token in need_tokens:
+            if token in keyword or keyword in token:
+                score += 1
+    return score
 
 
 def _distance_km(lat1: float, lng1: float, lat2: float, lng2: float) -> float:

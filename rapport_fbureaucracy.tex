@@ -1,0 +1,1299 @@
+\documentclass[12pt,a4paper]{report}
+
+% ============================================================
+% Rapport de Projet - Fbureaucracy
+% Compilation recommandee : pdfLaTeX
+% ============================================================
+
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{setspace}
+
+\onehalfspacing
+
+\definecolor{primary}{HTML}{1B3A4B}
+\definecolor{secondary}{HTML}{2D7D6F}
+\definecolor{lightgray}{HTML}{F4F5F7}
+\definecolor{codebg}{HTML}{F7F7F7}
+\definecolor{codeframe}{HTML}{D9DEE5}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primary,
+    urlcolor=secondary,
+    citecolor=primary
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Fbureaucracy}
+\fancyhead[R]{Rapport de projet}
+\fancyfoot[C]{\thepage}
+
+\titleformat{\chapter}
+  {\normalfont\Huge\bfseries\color{primary}}
+  {\thechapter}{20pt}{}
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{primary}}
+  {\thesection}{12pt}{}
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{secondary}}
+  {\thesubsection}{10pt}{}
+
+\lstdefinestyle{code}{
+    backgroundcolor=\color{codebg},
+    frame=single,
+    rulecolor=\color{codeframe},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    columns=fullflexible,
+    keepspaces=true,
+    showstringspaces=false,
+    tabsize=2,
+    keywordstyle=\color{primary}\bfseries,
+    commentstyle=\color{secondary},
+    stringstyle=\color{orange!70!black}
+}
+
+\lstset{style=code}
+
+\begin{document}
+
+% ============================================================
+% PAGE DE GARDE
+% ============================================================
+
+\begin{titlepage}
+    \centering
+    \vspace*{1.5cm}
+
+    {\Huge\bfseries\color{primary} Fbureaucracy \par}
+    \vspace{0.4cm}
+    {\Large Assistant administratif intelligent pour la Tunisie \par}
+
+    \vspace{1cm}
+    {\large Simplifier les démarches administratives grâce à l'IA, au RAG, à GenUI et au mobile \par}
+
+    \vspace{2cm}
+
+    \begin{tabular}{rl}
+        \textbf{Présenté par :} & Ton nom \\
+        \textbf{Equipe :} & Ton équipe \\
+        \textbf{Cadre :} & Université / Startup / Hackathon \\
+        \textbf{Technologies :} & Flutter, FastAPI, ChromaDB, Gemini, GenUI \\
+    \end{tabular}
+
+    \vfill
+    {\large Année universitaire 2025--2026 \par}
+\end{titlepage}
+
+\tableofcontents
+\listoffigures
+\listoftables
+\newpage
+
+% ============================================================
+
+\chapter*{Résumé Exécutif}
+\addcontentsline{toc}{chapter}{Résumé Exécutif}
+
+Fbureaucracy est une application intelligente qui aide les citoyens, les étudiants, les entrepreneurs, les PME et les résidents étrangers en Tunisie à comprendre et préparer leurs démarches administratives. L'utilisateur pose une question simple, par exemple : \og Comment renouveler ma carte grise ? \fg{}. Le système recherche les informations pertinentes dans une base documentaire, génère une réponse structurée avec l'intelligence artificielle, puis transforme cette réponse en interface dynamique grâce à GenUI.
+
+Le projet combine un frontend Flutter, un backend FastAPI, une base vectorielle ChromaDB, un modèle d'IA appelé via OpenRouter/Gemini, une validation Pydantic, un système de cache Redis, une file de tâches Celery et une base de données SQLite en développement avec une cible PostgreSQL pour la production.
+
+L'innovation principale du projet est l'utilisation de GenUI : l'application ne se limite pas à afficher du texte généré par l'IA, elle construit automatiquement des composants visuels adaptés à chaque procédure : étapes, checklist, coûts, bureau responsable, avertissements et localisation.
+
+% ============================================================
+
+\chapter{Introduction}
+
+\section{Contexte Général}
+
+Les démarches administratives représentent souvent une source de confusion pour les citoyens et les entreprises. Les informations sont parfois dispersées sur plusieurs plateformes, les documents nécessaires ne sont pas toujours connus à l'avance, les frais peuvent être découverts au dernier moment et le langage administratif reste difficile à comprendre pour de nombreux utilisateurs.
+
+Dans ce contexte, Fbureaucracy propose une solution GovTech moderne qui exploite l'intelligence artificielle, le RAG et le mobile afin de transformer une démarche administrative floue en plan d'action clair.
+
+\section{Problématique}
+
+La problématique principale peut être formulée ainsi :
+
+\begin{quote}
+Comment aider un utilisateur tunisien à comprendre rapidement une démarche administrative, connaître les documents nécessaires, les étapes à suivre, les coûts et le bureau responsable, sans devoir parcourir plusieurs sites ou se déplacer inutilement ?
+\end{quote}
+
+\section{Objectifs du Projet}
+
+Les objectifs principaux sont :
+
+\begin{itemize}
+    \item simplifier l'accès aux informations administratives ;
+    \item réduire la perte de temps et les déplacements inutiles ;
+    \item fournir des réponses personnalisées selon le profil de l'utilisateur ;
+    \item générer des interfaces dynamiques à partir de réponses IA structurées ;
+    \item offrir une expérience mobile multilingue en français, arabe et anglais ;
+    \item préparer une architecture évolutive vers une plateforme GovTech complète.
+\end{itemize}
+
+% ============================================================
+
+\chapter{Présentation Générale du Projet}
+
+\section{Idée du Produit}
+
+Fbureaucracy est un assistant administratif intelligent pour la Tunisie. L'application permet à l'utilisateur de chercher une procédure administrative en langage naturel. Le système génère ensuite un guide clair contenant :
+
+\begin{itemize}
+    \item les documents requis ;
+    \item les étapes de la procédure ;
+    \item les frais estimés ;
+    \item le bureau ou l'administration responsable ;
+    \item les avertissements importants ;
+    \item la localisation des bureaux pertinents ;
+    \item un historique des démarches consultées.
+\end{itemize}
+
+\section{Utilisateurs Cibles}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{4cm}|p{9cm}|}
+\hline
+\textbf{Utilisateur cible} & \textbf{Besoin principal} \\
+\hline
+Citoyens & Comprendre les procédures personnelles : CIN, passeport, extrait de naissance, résidence. \\
+\hline
+Etudiants & Préparer les dossiers administratifs liés aux études, bourses ou inscriptions. \\
+\hline
+Entrepreneurs & Comprendre les démarches de création d'entreprise, RNE, fiscalité, CNSS. \\
+\hline
+PME & Suivre les obligations administratives et fiscales. \\
+\hline
+Résidents étrangers & Comprendre les démarches de résidence et de documents officiels. \\
+\hline
+\end{tabular}
+\caption{Utilisateurs cibles de Fbureaucracy}
+\end{table}
+
+\section{Proposition de Valeur}
+
+La proposition de valeur du projet est :
+
+\begin{quote}
+\textbf{Transformer une démarche administrative floue en plan d'action clair, interactif et personnalisé.}
+\end{quote}
+
+% ============================================================
+
+\chapter{Etapes de Création du Projet}
+
+\section{Analyse du Besoin}
+
+La première étape a consisté à identifier un problème réel : la complexité des démarches administratives en Tunisie. Les utilisateurs ont besoin d'informations simples, fiables et actionnables.
+
+\section{Choix des Technologies}
+
+Le choix technologique s'est orienté vers :
+
+\begin{itemize}
+    \item \textbf{Flutter} pour développer une application mobile et web avec une seule base de code ;
+    \item \textbf{FastAPI} pour construire rapidement des APIs REST performantes ;
+    \item \textbf{ChromaDB} pour stocker et rechercher des documents sous forme vectorielle ;
+    \item \textbf{OpenRouter/Gemini} pour générer les réponses IA ;
+    \item \textbf{Firebase Auth} pour l'authentification Google ;
+    \item \textbf{Redis et Celery} pour le cache et les traitements asynchrones ;
+    \item \textbf{SQLite/PostgreSQL} pour la persistance des données.
+\end{itemize}
+
+\section{Création du Backend}
+
+Le backend a été organisé autour de FastAPI. Les routes sont séparées des services métier. Les schémas Pydantic valident les entrées et sorties. Les services principaux gèrent l'authentification, le RAG, l'IA, l'historique et les catégories.
+
+\section{Création du Frontend}
+
+Le frontend Flutter contient des écrans pour l'authentification, l'accueil, la recherche, les détails de procédure, l'historique et la localisation des bureaux. Riverpod gère l'état global et GoRouter assure la navigation.
+
+\section{Intégration de l'Intelligence Artificielle}
+
+L'IA est utilisée pour générer une réponse structurée à partir de la question utilisateur et du contexte récupéré dans ChromaDB. Le résultat est validé puis affiché dynamiquement.
+
+\section{Ajout de GenUI}
+
+GenUI représente l'objectif central du projet. Le backend génère un JSON structuré, puis Flutter le transforme automatiquement en composants visuels : cartes d'information, étapes, checklists, tableaux de coûts et blocs de localisation.
+
+% ============================================================
+
+\chapter{Architecture Globale du Projet}
+
+\section{Vue d'Ensemble}
+
+\begin{verbatim}
+Utilisateur
+    |
+    v
+Application Flutter
+    |
+    v
+API FastAPI
+    |
+    +--> ChromaDB : recherche documentaire RAG
+    |
+    +--> OpenRouter / Gemini : génération IA
+    |
+    +--> Pydantic : validation du JSON
+    |
+    +--> SQLite / PostgreSQL : sauvegarde historique
+    |
+    v
+JSON GenUI
+    |
+    v
+Flutter GenUI Renderer
+    |
+    v
+Interface dynamique
+\end{verbatim}
+
+\section{Architecture Fonctionnelle}
+
+Le fonctionnement global est le suivant :
+
+\begin{enumerate}
+    \item L'utilisateur pose une question dans l'application Flutter.
+    \item Flutter envoie la question à FastAPI via une API REST.
+    \item FastAPI recherche les documents les plus pertinents dans ChromaDB.
+    \item Le contexte trouvé est envoyé à Gemini via OpenRouter.
+    \item Gemini génère un JSON structuré.
+    \item Pydantic valide la structure de la réponse.
+    \item Flutter reçoit le JSON et le transforme en interface dynamique.
+    \item Si l'utilisateur est connecté, la procédure est sauvegardée dans l'historique.
+\end{enumerate}
+
+% ============================================================
+
+\chapter{Structure Globale du Projet}
+
+\section{Structure Principale}
+
+\begin{lstlisting}[language=bash,caption={Structure globale du projet}]
+GenUi/
+|-- backend/
+|   |-- app/
+|   |   |-- api/routes/
+|   |   |-- core/
+|   |   |-- db/
+|   |   |-- schemas/
+|   |   |-- services/
+|   |   |-- data/
+|   |   |-- utils/
+|   |   |-- main.py
+|   |   |-- cache.py
+|   |   |-- celery_app.py
+|   |   |-- tasks.py
+|   |-- chroma_data/
+|   |-- migrations/
+|   |-- tests/
+|   |-- requirements.txt
+|   |-- docker-compose.yml
+|
+|-- frontend/
+|   |-- lib/
+|   |   |-- core/
+|   |   |-- features/
+|   |   |-- renderer/
+|   |   |-- shared/
+|   |   |-- main.dart
+|   |-- pubspec.yaml
+\end{lstlisting}
+
+\section{Structure Backend}
+
+\begin{longtable}{|p{4cm}|p{10cm}|}
+\hline
+\textbf{Dossier/Fichier} & \textbf{Rôle} \\
+\hline
+\endhead
+\texttt{app/main.py} & Point d'entrée FastAPI. Initialise l'application, les middlewares, les routes et les services au démarrage. \\
+\hline
+\texttt{app/api/routes/} & Contient les endpoints REST : auth, chat, GenUI, catégories, historique, bureaux, procédures. \\
+\hline
+\texttt{app/core/} & Contient la configuration, la sécurité Firebase et le logging. \\
+\hline
+\texttt{app/db/} & Définit les modèles SQLAlchemy et la session de base de données. \\
+\hline
+\texttt{app/schemas/} & Définit les schémas Pydantic pour les requêtes et réponses. \\
+\hline
+\texttt{app/services/} & Contient la logique métier : RAG, IA, auth, historique, catégories. \\
+\hline
+\texttt{app/data/raw/} & Contient les documents administratifs sources utilisés pour l'indexation RAG. \\
+\hline
+\texttt{app/utils/validators.py} & Valide et répare les réponses IA avant affichage. \\
+\hline
+\texttt{chroma\_data/} & Dossier de stockage local de ChromaDB. \\
+\hline
+\end{longtable}
+
+\section{Structure Frontend}
+
+\begin{longtable}{|p{4cm}|p{10cm}|}
+\hline
+\textbf{Dossier/Fichier} & \textbf{Rôle} \\
+\hline
+\endhead
+\texttt{main.dart} & Initialise Flutter, Firebase, Riverpod, la langue et la navigation. \\
+\hline
+\texttt{core/api/} & Contient les services de communication avec le backend. \\
+\hline
+\texttt{core/auth/} & Gère l'authentification et l'état utilisateur. \\
+\hline
+\texttt{core/router/} & Définit les routes de navigation avec GoRouter. \\
+\hline
+\texttt{core/locale/} & Contient les textes multilingues FR/AR/EN. \\
+\hline
+\texttt{features/} & Contient les écrans fonctionnels : accueil, login, recherche, procédures, historique, bureaux. \\
+\hline
+\texttt{renderer/} & Contient le moteur de rendu GenUI. \\
+\hline
+\texttt{shared/} & Contient les modèles et widgets réutilisables. \\
+\hline
+\end{longtable}
+
+% ============================================================
+
+\chapter{Technologies Utilisées et Rôles}
+
+\section{Technologies Frontend}
+
+\begin{longtable}{|p{4cm}|p{10cm}|}
+\hline
+\textbf{Technologie} & \textbf{Rôle dans le projet} \\
+\hline
+\endhead
+Flutter & Permet de développer l'application mobile/web avec une seule base de code. Il affiche les écrans, les cartes, les checklists et le rendu GenUI. \\
+\hline
+Riverpod & Gère l'état de l'application : utilisateur connecté, langue, résultats de recherche, historique et détails de procédure. \\
+\hline
+GoRouter & Gère la navigation entre les écrans : splash, login, accueil, recherche, détail, historique et localisation. \\
+\hline
+Firebase Auth & Permet la connexion Google et fournit un token vérifiable côté backend. \\
+\hline
+Multilingue FR/AR/EN & Permet une utilisation adaptée au contexte tunisien avec support du français, de l'arabe et de l'anglais. \\
+\hline
+\end{longtable}
+
+\section{Technologies Backend}
+
+\begin{longtable}{|p{4cm}|p{10cm}|}
+\hline
+\textbf{Technologie} & \textbf{Rôle dans le projet} \\
+\hline
+\endhead
+FastAPI & Framework principal du backend. Il expose les APIs REST consommées par Flutter. \\
+\hline
+Pydantic & Valide les requêtes utilisateur et les réponses IA structurées. \\
+\hline
+SQLAlchemy & Gère les modèles et les sessions de base de données. \\
+\hline
+SQLite & Base locale utilisée en développement. \\
+\hline
+PostgreSQL & Base prévue pour la production via Docker Compose. \\
+\hline
+\end{longtable}
+
+\section{Technologies IA et Infrastructure}
+
+\begin{longtable}{|p{4cm}|p{10cm}|}
+\hline
+\textbf{Technologie} & \textbf{Rôle dans le projet} \\
+\hline
+\endhead
+ChromaDB & Base vectorielle utilisée pour stocker les documents administratifs sous forme d'embeddings et faire la recherche RAG. \\
+\hline
+RAG & Méthode qui combine recherche documentaire et génération IA pour améliorer la fiabilité des réponses. \\
+\hline
+OpenRouter & Passerelle utilisée pour appeler le modèle IA. \\
+\hline
+Gemini & Modèle IA qui génère les guides administratifs structurés. \\
+\hline
+Redis & Sert de cache et de broker pour Celery. \\
+\hline
+Celery & Exécute les tâches longues de génération IA en arrière-plan. \\
+\hline
+Docker Compose & Prépare l'environnement avec API, PostgreSQL, Redis et worker Celery. \\
+\hline
+\end{longtable}
+
+% ============================================================
+
+\chapter{Backend FastAPI}
+
+\section{Point d'Entrée : \texttt{main.py}}
+
+Le fichier \texttt{main.py} crée l'application FastAPI, configure le CORS, initialise Firebase, la base de données, Redis et enregistre toutes les routes.
+
+\begin{lstlisting}[language=Python,caption={Création de l'application FastAPI}]
+def create_app() -> FastAPI:
+    app = FastAPI(
+        title="Fberaucracy API",
+        description="Tunisia Bureaucracy Navigator",
+        version="1.0.0",
+        lifespan=lifespan,
+    )
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    from app.api.routes import auth, categories, chat, gen_ui, history, offices, procedures
+
+    app.include_router(auth.router, prefix="/api/v1")
+    app.include_router(chat.router, prefix="/api/v1")
+    app.include_router(gen_ui.router, prefix="/api/v1")
+    app.include_router(offices.router, prefix="/api/v1")
+    app.include_router(procedures.router, prefix="/api/v1")
+    app.include_router(categories.router, prefix="/api/v1")
+    app.include_router(history.router, prefix="/api/v1")
+
+    return app
+\end{lstlisting}
+
+\textbf{Explication :} ce code centralise la configuration du backend. Chaque route est ajoutée avec le préfixe \texttt{/api/v1}. Flutter communique avec ces routes pour obtenir les catégories, générer les guides GenUI, sauvegarder l'historique et localiser les bureaux.
+
+\section{Configuration : \texttt{config.py}}
+
+Le fichier \texttt{config.py} contient les paramètres du projet : base de données, Redis, OpenRouter, Gemini, ChromaDB et options RAG.
+
+\begin{lstlisting}[language=Python,caption={Configuration principale du backend}]
+class Settings(BaseSettings):
+    APP_ENV: str = Field(default="development")
+    APP_PORT: int = Field(default=8000)
+
+    OPENROUTER_API_KEY: str = Field(default="")
+    OPENROUTER_MODEL: str = Field(default="google/gemini-2.5-flash")
+
+    CHROMA_PERSIST_DIRECTORY: str = Field(default="./chroma_data")
+    CHROMA_COLLECTION_NAME: str = Field(default="fberaucracy_procedures")
+
+    REDIS_URL: str = Field(default="redis://localhost:6379/0")
+    CACHE_TTL_SECONDS: int = Field(default=86400)
+    CACHE_ENABLED: bool = Field(default=True)
+
+    @computed_field
+    @property
+    def DATABASE_URL(self) -> str:
+        return "sqlite+aiosqlite:///./fberaucracy.db"
+\end{lstlisting}
+
+\textbf{Explication :} cette configuration indique que le projet utilise actuellement SQLite en développement. Le Docker Compose prévoit PostgreSQL pour la production, mais le code force encore SQLite via \texttt{DATABASE\_URL}. C'est un point à améliorer.
+
+\section{Sécurité et Authentification}
+
+Le fichier \texttt{security.py} vérifie les tokens Firebase envoyés depuis Flutter.
+
+\begin{lstlisting}[language=Python,caption={Vérification du token Firebase}]
+async def verify_firebase_token(
+    credentials: Annotated[HTTPAuthorizationCredentials, Security(bearer_scheme)],
+) -> DecodedToken:
+    token = credentials.credentials
+    try:
+        decoded = firebase_auth.verify_id_token(token, check_revoked=True)
+        return DecodedToken(decoded)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication failed.",
+        )
+\end{lstlisting}
+
+\textbf{Explication :} lorsqu'un utilisateur est connecté avec Google, Flutter obtient un token Firebase. Ce token est envoyé au backend. FastAPI le vérifie avant d'autoriser l'accès aux routes protégées comme l'historique.
+
+\section{Modèles de Base de Données}
+
+Le fichier \texttt{models.py} définit les tables principales.
+
+\begin{lstlisting}[language=Python,caption={Modèle utilisateur}]
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    firebase_uid: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    email: Mapped[Optional[str]] = mapped_column(String(320), nullable=True)
+    role: Mapped[str] = mapped_column(String(32), nullable=False, default="individual")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+\end{lstlisting}
+
+\textbf{Explication :} cette table stocke les utilisateurs connectés, leur identifiant Firebase, leur email et leur rôle : particulier ou entreprise.
+
+\begin{lstlisting}[language=Python,caption={Modèle historique}]
+class ChatHistory(Base):
+    __tablename__ = "chat_history"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    user_message: Mapped[str] = mapped_column(Text, nullable=False)
+    ai_response: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+\end{lstlisting}
+
+\textbf{Explication :} cette table garde l'historique des questions utilisateur et des réponses IA au format JSON.
+
+% ============================================================
+
+\chapter{Services Backend Importants}
+
+\section{Service RAG : \texttt{rag\_service.py}}
+
+Le service RAG est responsable de l'indexation des documents et de la recherche intelligente.
+
+\begin{lstlisting}[language=Python,caption={Initialisation de ChromaDB}]
+def _get_chroma_collection() -> chromadb.Collection:
+    global _chroma_client, _collection
+    if _collection is not None:
+        return _collection
+
+    _chroma_client = chromadb.PersistentClient(
+        path=settings.CHROMA_PERSIST_DIRECTORY,
+        settings=ChromaSettings(anonymized_telemetry=False),
+    )
+    _collection = _chroma_client.get_or_create_collection(
+        name=settings.CHROMA_COLLECTION_NAME,
+        metadata={"hnsw:space": "cosine"},
+    )
+    return _collection
+\end{lstlisting}
+
+\textbf{Explication :} ce code crée une collection ChromaDB persistante dans le dossier \texttt{chroma\_data}. Les documents administratifs y sont stockés sous forme vectorielle.
+
+\begin{lstlisting}[language=Python,caption={Recherche de documents similaires}]
+async def search_similar_chunks(
+    query: str,
+    top_k: int = None,
+    category_filter: Optional[str] = None,
+) -> List[dict]:
+    top_k = top_k or settings.RAG_TOP_K
+    collection = _get_chroma_collection()
+
+    query_embedding = await embed_text(query)
+
+    where_clause = None
+    if category_filter:
+        where_clause = {"category": {"$eq": category_filter}}
+
+    results = collection.query(
+        query_embeddings=[query_embedding],
+        n_results=top_k,
+        where=where_clause,
+        include=["documents", "metadatas", "distances"],
+    )
+
+    return [
+        {"text": doc, "metadata": meta, "distance": round(dist, 4)}
+        for doc, meta, dist in zip(
+            results["documents"][0],
+            results["metadatas"][0],
+            results["distances"][0],
+        )
+    ]
+\end{lstlisting}
+
+\textbf{Explication :} la question utilisateur est transformée en embedding. ChromaDB compare cet embedding avec ceux des documents indexés et retourne les passages les plus proches.
+
+\section{Service IA : \texttt{gemini\_service.py}}
+
+Le service IA construit le prompt et appelle OpenRouter/Gemini.
+
+\begin{lstlisting}[language=Python,caption={Construction du prompt IA}]
+def build_prompt(
+    user_message: str,
+    context_chunks: List[dict],
+    language: str = "fr",
+    role: Optional[str] = None,
+) -> str:
+    if context_chunks:
+        context_block = "\n".join([
+            f"--- Context Chunk {i} ---\n{chunk['text']}"
+            for i, chunk in enumerate(context_chunks, start=1)
+        ])
+
+        return f"""
+You are a precise structured data formatter for Fbureaucracy.
+
+STRICT RULES:
+1. Return ONLY valid JSON.
+2. Use ONLY the information in the CONTEXT CHUNKS.
+3. Do NOT invent data.
+4. The type field MUST be procedure_guide.
+
+USER QUESTION:
+{user_message}
+
+CONTEXT CHUNKS:
+{context_block}
+"""
+\end{lstlisting}
+
+\textbf{Explication :} lorsque ChromaDB fournit un contexte, le modèle est guidé pour utiliser uniquement ces données. Cela améliore la fiabilité.
+
+\begin{lstlisting}[language=Python,caption={Appel OpenRouter}]
+async def generate_procedure_response(
+    user_message: str,
+    context_chunks: List[dict],
+    language: str = "fr",
+    role: Optional[str] = None,
+    max_retries: int = 3,
+) -> str:
+    prompt = build_prompt(user_message, context_chunks, language, role=role)
+
+    async with httpx.AsyncClient(timeout=90.0) as client:
+        response = await client.post(
+            f"{settings.OPENROUTER_BASE_URL.rstrip('/')}/chat/completions",
+            headers=_build_headers(),
+            json=_build_payload(prompt),
+        )
+        response.raise_for_status()
+
+    return _extract_response_text(response.json())
+\end{lstlisting}
+
+\textbf{Explication :} le backend envoie le prompt à OpenRouter. Le modèle Gemini retourne un texte JSON qui sera ensuite validé.
+
+\section{Validation IA : \texttt{validators.py}}
+
+La validation est essentielle car une IA peut produire une réponse mal formée.
+
+\begin{lstlisting}[language=Python,caption={Validation de la réponse IA}]
+def validate_gemini_response(raw: str) -> Union[ProcedureGuideResponse, ErrorResponse]:
+    cleaned = raw.strip()
+
+    if cleaned.startswith("```"):
+        lines = cleaned.splitlines()
+        lines = [ln for ln in lines if not ln.strip().startswith("```")]
+        cleaned = "\n".join(lines).strip()
+
+    try:
+        data = json.loads(cleaned)
+    except json.JSONDecodeError:
+        return FALLBACK_ERROR
+
+    if data.get("type", "procedure_guide") != "procedure_guide":
+        return FALLBACK_ERROR
+
+    if "steps" not in data:
+        return FALLBACK_ERROR
+
+    data = _repair_data(data)
+
+    try:
+        return ProcedureGuideResponse.model_validate(data)
+    except ValidationError:
+        return FALLBACK_ERROR
+\end{lstlisting}
+
+\textbf{Explication :} ce code nettoie la réponse IA, vérifie qu'elle est bien du JSON, répare certains champs manquants et valide la structure finale avec Pydantic.
+
+\section{Service GenUI : \texttt{gen\_ui.py}}
+
+La route GenUI génère ou récupère une procédure.
+
+\begin{lstlisting}[language=Python,caption={Endpoint GenUI avec cache et Celery}]
+@router.post("/search")
+async def generate_ui_from_search(request: ChatRequest):
+    cached = get_cached_response(request.message, request.language)
+
+    if cached is not None:
+        return ProcedureGuideResponse.model_validate(cached)
+
+    task = celery.send_task(
+        "fbureaucracy.generate_procedure",
+        kwargs={
+            "user_message": request.message,
+            "language": request.language,
+            "category": request.category,
+            "role": request.role,
+        },
+    )
+
+    return JSONResponse(
+        status_code=202,
+        content={"status": "processing", "task_id": task.id},
+    )
+\end{lstlisting}
+
+\textbf{Explication :} si la réponse existe déjà dans Redis, elle est retournée immédiatement. Sinon, une tâche Celery est lancée en arrière-plan et le frontend fait du polling jusqu'à la fin.
+
+\section{Cache Redis : \texttt{cache.py}}
+
+\begin{lstlisting}[language=Python,caption={Clé de cache Redis}]
+def normalize_query(message: str) -> str:
+    text = message.strip().lower()
+    text = _MULTI_SPACE.sub(" ", text)
+    text = _TRAILING_PUNCT.sub("", text)
+    return text.strip()
+
+def make_cache_key(message: str, language: str) -> str:
+    normalised = normalize_query(message)
+    raw = f"{normalised}|{language}"
+    digest = hashlib.sha256(raw.encode("utf-8")).hexdigest()
+    return f"fbureaucracy:cache:{digest}"
+\end{lstlisting}
+
+\textbf{Explication :} les questions similaires produisent la même clé de cache. Cela évite de refaire des appels IA coûteux.
+
+\section{Tâches Celery : \texttt{tasks.py}}
+
+\begin{lstlisting}[language=Python,caption={Tâche de génération de procédure}]
+@celery.task(name="fbureaucracy.generate_procedure")
+def generate_procedure_task(
+    self,
+    user_message: str,
+    language: str = "fr",
+    category: Optional[str] = None,
+    role: Optional[str] = None,
+):
+    context_chunks = rag_service.search_similar_chunks(
+        query=user_message,
+        category_filter=category,
+    )
+
+    raw_response = gemini_service.generate_procedure_response(
+        user_message=user_message,
+        context_chunks=context_chunks,
+        language=language,
+        role=role,
+    )
+
+    validated = validate_gemini_response(raw_response)
+    result_dict = validated.model_dump()
+
+    if result_dict.get("type") == "procedure_guide":
+        set_cached_response(user_message, language, result_dict)
+
+    return result_dict
+\end{lstlisting}
+
+\textbf{Explication :} cette tâche exécute le pipeline complet en arrière-plan : recherche RAG, génération IA, validation et mise en cache.
+
+% ============================================================
+
+\chapter{Frontend Flutter}
+
+\section{Initialisation : \texttt{main.dart}}
+
+\begin{lstlisting}[language=Java,caption={Initialisation de l'application Flutter}]
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Firebase init failed: $e');
+  }
+
+  runApp(const ProviderScope(child: FbureaucracyApp()));
+}
+\end{lstlisting}
+
+\textbf{Explication :} ce code initialise Firebase puis lance l'application avec Riverpod.
+
+\section{Navigation : \texttt{app\_router.dart}}
+
+\begin{lstlisting}[language=Java,caption={Navigation avec GoRouter}]
+final appRouterProvider = Provider<GoRouter>((ref) {
+  return GoRouter(
+    initialLocation: RoutePaths.splash,
+    routes: [
+      GoRoute(path: RoutePaths.splash, builder: (_, __) => const SplashScreen()),
+      GoRoute(path: RoutePaths.login, builder: (_, __) => const LoginScreen()),
+      GoRoute(path: RoutePaths.home, builder: (_, __) => const HomeScreen()),
+      GoRoute(path: RoutePaths.search, builder: (_, __) => const SearchScreen()),
+      GoRoute(
+        path: '/procedures/:slug',
+        builder: (context, state) => ProcedureDetailScreen(
+          slug: state.pathParameters['slug'] ?? 'buy-used-car',
+        ),
+      ),
+    ],
+  );
+});
+\end{lstlisting}
+
+\textbf{Explication :} GoRouter définit les écrans et permet de naviguer vers une procédure en utilisant son \texttt{slug}.
+
+\section{Authentification : \texttt{auth\_provider.dart}}
+
+\begin{lstlisting}[language=Java,caption={Connexion Google et backend}]
+Future<void> login(String role) async {
+  final googleProvider = GoogleAuthProvider();
+  final userCredential =
+      await FirebaseAuth.instance.signInWithPopup(googleProvider);
+
+  final firebaseUser = userCredential.user;
+  final firebaseIdToken = await firebaseUser!.getIdToken();
+
+  final response = await http.post(
+    Uri.parse('${AppConfig.apiV1}/auth/login'),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({'id_token': firebaseIdToken, 'role': role}),
+  );
+}
+\end{lstlisting}
+
+\textbf{Explication :} Flutter connecte l'utilisateur avec Google, récupère un token Firebase, puis l'envoie au backend pour créer ou mettre à jour l'utilisateur.
+
+\section{Communication API : \texttt{http\_api\_service.dart}}
+
+\begin{lstlisting}[language=Java,caption={Appel GenUI depuis Flutter}]
+Future<ProcedureModel> getProcedureDetail(
+  String slug, {
+  String? role,
+  String? authToken,
+  String? language,
+}) async {
+  final message = slug.replaceAll('-', ' ');
+
+  final response = await _client.post(
+    Uri.parse('${AppConfig.apiV1}/gen-ui/search'),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({
+      'message': message,
+      'language': language ?? 'fr',
+      if (role != null) 'role': role,
+    }),
+  );
+
+  final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+
+  if (response.statusCode == 200) {
+    return ProcedureGuideAdapter.fromJson(decoded, slug: slug);
+  }
+
+  if (response.statusCode == 202) {
+    return _pollForResult(decoded['task_id'], slug, language ?? 'fr');
+  }
+
+  throw ApiException('Erreur serveur');
+}
+\end{lstlisting}
+
+\textbf{Explication :} Flutter appelle l'endpoint GenUI. Si le backend retourne directement le résultat, l'application l'affiche. Si le backend lance une tâche Celery, Flutter attend le résultat via polling.
+
+% ============================================================
+
+\chapter{GenUI dans le Projet}
+
+\section{Définition}
+
+GenUI signifie \og Generative User Interface \fg{}. Dans ce projet, l'IA ne génère pas seulement un texte, elle génère une structure qui décrit l'interface à afficher.
+
+\section{Format JSON Généré}
+
+\begin{lstlisting}[language=json,caption={Structure JSON GenUI générée par l'IA}]
+{
+  "type": "procedure_guide",
+  "title": {
+    "ar": "...",
+    "fr": "...",
+    "en": "..."
+  },
+  "steps": [
+    {
+      "number": 1,
+      "title": "...",
+      "description": "...",
+      "location": "..."
+    }
+  ],
+  "documents": ["CIN", "Formulaire"],
+  "costs": {
+    "total": 0.6,
+    "currency": "TND",
+    "breakdown": [
+      {"label": "Timbre fiscal", "amount": 0.6}
+    ]
+  },
+  "office": {
+    "name": "Municipalite de Sfax",
+    "address": "...",
+    "hours": "..."
+  },
+  "warnings": ["Document valable 3 mois"],
+  "source": "extrait_naissance_sfax",
+  "last_verified": "2024-01-15"
+}
+\end{lstlisting}
+
+\section{Adaptation en Widgets Flutter}
+
+Le fichier \texttt{procedure\_guide\_adapter.dart} transforme le JSON en blocs UI.
+
+\begin{lstlisting}[language=Java,caption={Transformation JSON vers blocs UI}]
+final blocks = <UiBlockModel>[];
+
+if (warnings.isNotEmpty) {
+  blocks.add(
+    UiBlockModel(
+      type: 'info_card',
+      data: {
+        'title': labels.beforeStart,
+        'body': warnings.map((e) => '- $e').join('\n'),
+        'icon': 'shield',
+      },
+    ),
+  );
+}
+
+if (steps.isNotEmpty) {
+  blocks.add(UiBlockModel(type: 'stepper', data: {'steps': stepperSteps}));
+}
+
+if (docs.isNotEmpty) {
+  blocks.add(UiBlockModel(type: 'checklist', data: {'items': checklistItems}));
+}
+\end{lstlisting}
+
+\textbf{Explication :} chaque partie du JSON est transformée en bloc visuel. Les avertissements deviennent une carte, les étapes deviennent un stepper, les documents deviennent une checklist.
+
+\section{Moteur de Rendu : \texttt{block\_renderer.dart}}
+
+\begin{lstlisting}[language=Java,caption={Rendu dynamique des blocs GenUI}]
+Widget _buildBlock(UiBlockModel block) {
+  return switch (block.type) {
+    'info_card' => InfoCardBlockWidget(data: block.data),
+    'stepper' => StepperBlockWidget(data: block.data),
+    'checklist' => ChecklistBlockWidget(data: block.data),
+    'cost_table' => CostTableBlockWidget(data: block.data),
+    'office_map_placeholder' => OfficeMapPlaceholderBlockWidget(data: block.data),
+    'office_list' => OfficeListBlockWidget(data: block.data),
+    'faq_list' => FAQListBlockWidget(data: block.data),
+    'section_title' => SectionTitleBlockWidget(data: block.data),
+    _ => const SizedBox.shrink(),
+  };
+}
+\end{lstlisting}
+
+\textbf{Explication :} ce code est le coeur de GenUI côté Flutter. Il lit le type du bloc et affiche le widget correspondant.
+
+% ============================================================
+
+\chapter{Fonctionnalités Principales}
+
+\begin{longtable}{|p{4cm}|p{10cm}|}
+\hline
+\textbf{Fonctionnalité} & \textbf{Description} \\
+\hline
+\endhead
+Recherche intelligente & L'utilisateur recherche une procédure avec une question naturelle. \\
+\hline
+Génération dynamique & L'IA génère un guide structuré en JSON. \\
+\hline
+Rendu GenUI & Flutter transforme le JSON en interface dynamique. \\
+\hline
+Checklist documents & L'application affiche les documents à préparer. \\
+\hline
+Estimation des coûts & Les frais sont affichés dans un tableau clair. \\
+\hline
+Localisation bureaux & L'application propose des bureaux proches et peut ouvrir Google Maps. \\
+\hline
+Historique utilisateur & Les procédures générées sont sauvegardées pour les utilisateurs connectés. \\
+\hline
+Authentification Google & Connexion via Firebase Auth. \\
+\hline
+Mode particulier/entreprise & Les catégories et réponses peuvent être adaptées au rôle de l'utilisateur. \\
+\hline
+Multilingue & Support du français, de l'arabe et de l'anglais. \\
+\hline
+\end{longtable}
+
+% ============================================================
+
+\chapter{Base de Données}
+
+\section{Tables Principales}
+
+La base locale observée contient trois tables principales :
+
+\begin{itemize}
+    \item \texttt{users}
+    \item \texttt{categories}
+    \item \texttt{chat\_history}
+\end{itemize}
+
+\section{Relation entre les Tables}
+
+\begin{verbatim}
+users
+  |
+  | 1 utilisateur peut avoir plusieurs historiques
+  v
+chat_history
+
+categories
+  |
+  | utilisées pour organiser les procédures
+  v
+frontend / backend
+\end{verbatim}
+
+\section{Rôle des Données}
+
+\begin{longtable}{|p{4cm}|p{10cm}|}
+\hline
+\textbf{Table} & \textbf{Utilisation} \\
+\hline
+\endhead
+\texttt{users} & Stocke les utilisateurs Firebase, leur email et leur rôle. \\
+\hline
+\texttt{categories} & Stocke les catégories administratives disponibles. \\
+\hline
+\texttt{chat\_history} & Stocke les questions utilisateur et les réponses IA générées. \\
+\hline
+\end{longtable}
+
+% ============================================================
+
+\chapter{Fiabilité des Informations}
+
+\section{Sources Actuelles}
+
+Les documents utilisés actuellement sont stockés dans :
+
+\begin{lstlisting}[language=bash]
+backend/app/data/raw/
+|-- carte_grise_sfax.txt
+|-- extrait_naissance_sfax.txt
+|-- attestation_residence_sfax.txt
+\end{lstlisting}
+
+Ces fichiers sont indexés dans ChromaDB afin d'être utilisés par le RAG.
+
+\section{Logique de Fiabilité}
+
+La fiabilité est assurée par plusieurs mécanismes :
+
+\begin{itemize}
+    \item les réponses IA sont guidées par des documents locaux ;
+    \item ChromaDB récupère les passages les plus proches de la question ;
+    \item le prompt demande au modèle de ne pas inventer lorsque du contexte existe ;
+    \item Pydantic valide la structure finale ;
+    \item les champs \texttt{source} et \texttt{last\_verified} permettent d'indiquer l'origine de l'information.
+\end{itemize}
+
+\section{Améliorations Recommandées}
+
+\begin{itemize}
+    \item connecter l'application à des sources officielles comme \url{https://services.gov.tn/} ou Idaraty ;
+    \item afficher systématiquement la source utilisée ;
+    \item ajouter un niveau de confiance ;
+    \item mettre en place une revue humaine des procédures sensibles ;
+    \item désactiver la génération en connaissance générale pour les procédures critiques ;
+    \item automatiser la réindexation des documents officiels.
+\end{itemize}
+
+% ============================================================
+
+\chapter{Tests et Validation}
+
+\section{Tests Backend}
+
+Le projet contient plusieurs tests dans le dossier \texttt{backend/tests/}.
+
+\begin{longtable}{|p{4cm}|p{10cm}|}
+\hline
+\textbf{Fichier de test} & \textbf{Objectif} \\
+\hline
+\endhead
+\texttt{test\_health.py} & Vérifie que l'API répond correctement au health check. \\
+\hline
+\texttt{test\_categories.py} & Vérifie le fonctionnement de l'endpoint catégories. \\
+\hline
+\texttt{test\_chat.py} & Teste le pipeline chat avec RAG et IA mockés. \\
+\hline
+\texttt{test\_offices.py} & Vérifie la localisation des bureaux. \\
+\hline
+\texttt{test\_procedures.py} & Vérifie la recherche et les fallbacks. \\
+\hline
+\texttt{test\_validators.py} & Vérifie la validation des réponses IA. \\
+\hline
+\end{longtable}
+
+\section{Exemple de Test de Validation IA}
+
+\begin{lstlisting}[language=Python,caption={Test de validation d'une réponse IA}]
+def test_validate_valid_json():
+    result = validate_gemini_response(json.dumps(VALID_PAYLOAD))
+    assert isinstance(result, ProcedureGuideResponse)
+    assert result.type == "procedure_guide"
+    assert result.costs.currency == "TND"
+\end{lstlisting}
+
+\textbf{Explication :} ce test garantit qu'un JSON IA valide est bien transformé en objet \texttt{ProcedureGuideResponse}.
+
+% ============================================================
+
+\chapter{Limites du Projet}
+
+\section{Limites Techniques}
+
+\begin{itemize}
+    \item La base de données est encore forcée en SQLite dans le code.
+    \item Certaines chaînes semblent avoir des problèmes d'encodage UTF-8.
+    \item Le cache Redis ne prend pas encore en compte tous les paramètres comme le rôle ou la catégorie dans la clé.
+    \item Le CORS est trop permissif avec \texttt{allow\_origins=["*"]}.
+    \item La carte réelle n'est pas encore intégrée ; il existe surtout un placeholder visuel.
+    \item ChromaDB est local, ce qui limite la scalabilité à grande échelle.
+\end{itemize}
+
+\section{Limites Produit}
+
+\begin{itemize}
+    \item Les données officielles ne sont pas encore connectées automatiquement.
+    \item La fiabilité dépend de la qualité des fichiers locaux.
+    \item L'utilisateur ne peut pas encore déposer un dossier en ligne.
+    \item L'application ne suit pas encore l'état réel d'une procédure administrative.
+\end{itemize}
+
+% ============================================================
+
+\chapter{Améliorations Futures}
+
+\section{Court Terme}
+
+\begin{itemize}
+    \item migrer réellement vers PostgreSQL ;
+    \item corriger l'encodage des textes ;
+    \item renforcer la sécurité des APIs ;
+    \item afficher la source et la date de vérification dans l'interface ;
+    \item améliorer les tests GenUI et Celery.
+\end{itemize}
+
+\section{Moyen Terme}
+
+\begin{itemize}
+    \item intégrer une vraie carte interactive ;
+    \item ajouter l'OCR pour analyser les documents utilisateur ;
+    \item connecter des sources officielles comme \texttt{services.gov.tn} ;
+    \item ajouter des notifications pour les renouvellements ;
+    \item créer un backoffice de gestion des procédures.
+\end{itemize}
+
+\section{Long Terme}
+
+\begin{itemize}
+    \item mettre en place des partenariats avec des administrations ;
+    \item permettre le dépôt de dossiers en ligne ;
+    \item créer une marketplace de services administratifs ;
+    \item étendre le produit à l'Afrique du Nord et à la région MENA ;
+    \item proposer une API B2B pour banques, assurances et legaltech.
+\end{itemize}
+
+% ============================================================
+
+\chapter{Conclusion}
+
+Fbureaucracy répond à un problème réel : la complexité des démarches administratives. Le projet propose une solution moderne qui combine mobile, intelligence artificielle, RAG, validation structurée et GenUI.
+
+L'application permet à un utilisateur de poser une question simple et de recevoir une interface claire avec les étapes, documents, coûts, bureaux et avertissements. Le projet montre ainsi comment l'IA peut être utilisée non seulement pour générer du texte, mais aussi pour générer une expérience utilisateur interactive.
+
+La valeur principale du projet peut être résumée ainsi :
+
+\begin{quote}
+\textbf{Fbureaucracy ne supprime pas la bureaucratie, il la rend compréhensible.}
+\end{quote}
+
+Avec des améliorations comme l'intégration de sources officielles, PostgreSQL en production, une vraie carte, l'OCR et des partenariats institutionnels, Fbureaucracy peut évoluer vers une plateforme GovTech complète pour la Tunisie et la région MENA.
+
+% ============================================================
+
+\appendix
+
+\chapter{Résumé des Endpoints Principaux}
+
+\begin{longtable}{|p{4cm}|p{10cm}|}
+\hline
+\textbf{Endpoint} & \textbf{Rôle} \\
+\hline
+\endhead
+\texttt{GET /health} & Vérifie que le backend fonctionne. \\
+\hline
+\texttt{POST /api/v1/auth/login} & Connecte l'utilisateur avec Firebase et son rôle. \\
+\hline
+\texttt{GET /api/v1/categories} & Retourne les catégories de procédures. \\
+\hline
+\texttt{GET /api/v1/procedures/search} & Recherche des procédures. \\
+\hline
+\texttt{POST /api/v1/gen-ui/search} & Génère une procédure GenUI. \\
+\hline
+\texttt{GET /api/v1/gen-ui/tasks/\{task\_id\}/status} & Vérifie l'état d'une tâche Celery. \\
+\hline
+\texttt{GET /api/v1/history/me/summaries} & Retourne l'historique résumé de l'utilisateur. \\
+\hline
+\texttt{POST /api/v1/history/me/save} & Sauvegarde une réponse GenUI dans l'historique. \\
+\hline
+\texttt{GET /api/v1/offices/nearby} & Retourne les bureaux proches ou pertinents. \\
+\hline
+\end{longtable}
+
+\chapter{Résumé du Pipeline IA}
+
+\begin{verbatim}
+Question utilisateur
+    |
+    v
+FastAPI reçoit la requête
+    |
+    v
+Transformation de la question en embedding
+    |
+    v
+Recherche des passages similaires dans ChromaDB
+    |
+    v
+Construction du prompt avec contexte
+    |
+    v
+Appel Gemini via OpenRouter
+    |
+    v
+Réponse JSON
+    |
+    v
+Validation Pydantic
+    |
+    v
+Sauvegarde / Cache
+    |
+    v
+Rendu GenUI dans Flutter
+\end{verbatim}
+
+\end{document}

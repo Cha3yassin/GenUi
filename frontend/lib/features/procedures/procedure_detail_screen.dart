@@ -120,22 +120,28 @@ class _ProcedureContentState extends State<_ProcedureContent>
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
       children: [
-        _staggeredItem(itemIndex++, _ProcedureHero(
-          procedure: widget.procedure,
-          locale: widget.locale,
-        )),
+        _staggeredItem(
+            itemIndex++,
+            _ProcedureHero(
+              procedure: widget.procedure,
+              locale: widget.locale,
+            )),
         const SizedBox(height: 18),
-        _staggeredItem(itemIndex++, BlockRenderer(
-          blocks: widget.procedure.blocks,
-          locale: widget.locale,
-        )),
-        _staggeredItem(itemIndex++, FilledButton.icon(
-          onPressed: () => context.push(
-            '${RoutePaths.offices}?stepId=mutation-dossier',
-          ),
-          icon: const Icon(Icons.near_me_rounded),
-          label: Text(AppStrings.get('find_nearest_office', widget.locale)),
-        )),
+        _staggeredItem(
+            itemIndex++,
+            BlockRenderer(
+              blocks: widget.procedure.blocks,
+              locale: widget.locale,
+            )),
+        _staggeredItem(
+            itemIndex++,
+            FilledButton.icon(
+              onPressed: () => context.push(
+                '${RoutePaths.offices}?stepId=${Uri.encodeComponent(widget.procedure.summary.slug)}',
+              ),
+              icon: const Icon(Icons.near_me_rounded),
+              label: Text(AppStrings.get('find_nearest_office', widget.locale)),
+            )),
       ],
     );
   }

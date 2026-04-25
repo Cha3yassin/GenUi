@@ -34,9 +34,11 @@ final procedureDetailProvider = FutureProvider.family<ProcedureModel, String>((
   final authState = ref.read(authProvider);
 
   // Pass auth token so the API service can save to history (fire-and-forget)
-  final token = authState.isAuthenticated ? authState.user!.firebaseToken : null;
+  final token =
+      authState.isAuthenticated ? authState.user!.firebaseToken : null;
 
-  return apiService.getProcedureDetail(slug, role: role, authToken: token, language: locale);
+  return apiService.getProcedureDetail(slug,
+      role: role, authToken: token, language: locale);
 });
 
 final categoryProceduresProvider =
@@ -44,7 +46,10 @@ final categoryProceduresProvider =
   ref,
   categoryId,
 ) {
-  return ref.watch(apiServiceProvider).getProceduresByCategory(categoryId);
+  final locale = ref.watch(localeProvider);
+  return ref
+      .watch(apiServiceProvider)
+      .getProceduresByCategory(categoryId, language: locale);
 });
 
 typedef NearbyOfficesQuery = ({String? stepId, double? lat, double? lng});
@@ -95,16 +100,22 @@ final searchResultsProvider = FutureProvider<List<ProcedureSummaryModel>>((
     throw Exception('Search cancelled due to debounce');
   }
 
-  return ref.watch(apiServiceProvider).searchProcedures(query, language: locale);
+  return ref
+      .watch(apiServiceProvider)
+      .searchProcedures(query, language: locale);
 });
 
 /// History summaries for the drawer (requires auth).
-final historySummariesProvider = FutureProvider<List<HistorySummary>>((ref) async {
+final historySummariesProvider =
+    FutureProvider<List<HistorySummary>>((ref) async {
   final authState = ref.watch(authProvider);
+  final locale = ref.watch(localeProvider);
   if (!authState.isAuthenticated) return [];
 
   final token = authState.user!.firebaseToken;
-  return ref.watch(apiServiceProvider).getHistorySummaries(token);
+  return ref
+      .watch(apiServiceProvider)
+      .getHistorySummaries(token, language: locale);
 });
 
 /// History detail — fetches full JSON for a past procedure, renders instantly.
@@ -117,7 +128,8 @@ final historyDetailProvider =
   }
 
   final token = authState.user!.firebaseToken;
-  final data = await ref.watch(apiServiceProvider).getHistoryDetail(token, historyId);
+  final data =
+      await ref.watch(apiServiceProvider).getHistoryDetail(token, historyId);
 
   // ai_response may come as a Map directly or as a JSON string
   final rawAiResponse = data['ai_response'];

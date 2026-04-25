@@ -7,13 +7,14 @@ import '../../shared/models/procedure_summary_model.dart';
 abstract class ApiService {
   Future<List<CategoryModel>> getCategories({String? role});
 
-  Future<List<ProcedureSummaryModel>> searchProcedures(String query, {String? language});
+  Future<List<ProcedureSummaryModel>> searchProcedures(String query,
+      {String? language});
 
-  Future<List<ProcedureSummaryModel>> getProceduresByCategory(
-    String categoryId,
-  );
+  Future<List<ProcedureSummaryModel>> getProceduresByCategory(String categoryId,
+      {String? language});
 
-  Future<ProcedureModel> getProcedureDetail(String slug, {String? role, String? authToken, String? language});
+  Future<ProcedureModel> getProcedureDetail(String slug,
+      {String? role, String? authToken, String? language});
 
   Future<List<OfficeModel>> getNearbyOffices({
     String? stepId,
@@ -22,11 +23,13 @@ abstract class ApiService {
   });
 
   /// Fetch lightweight history summaries (title + date) for the drawer.
-  Future<List<HistorySummary>> getHistorySummaries(String token);
+  Future<List<HistorySummary>> getHistorySummaries(String token,
+      {String? language});
 
   /// Fetch full history detail for re-rendering a past procedure.
   Future<Map<String, dynamic>> getHistoryDetail(String token, String historyId);
 
   /// Save a GenUI procedure result to history (requires auth token).
-  Future<void> saveToHistory(String token, String userMessage, Map<String, dynamic> aiResponse);
+  Future<void> saveToHistory(
+      String token, String userMessage, Map<String, dynamic> aiResponse);
 }

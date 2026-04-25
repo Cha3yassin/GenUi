@@ -86,33 +86,6 @@ class HistoryDrawer extends ConsumerWidget {
               ),
             ),
 
-            // ── User role badge ─────────────────────────────────────
-            if (authState.isAuthenticated) ...[
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: AppTheme.olive.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: AppTheme.olive.withOpacity(0.15),
-                    ),
-                  ),
-                  child: Text(
-                    AppStrings.get(authState.user!.role, locale),
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.olive,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-
             const SizedBox(height: 16),
             const Divider(),
 

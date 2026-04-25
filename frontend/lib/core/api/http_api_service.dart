@@ -43,8 +43,9 @@ class HttpApiService implements ApiService {
       if (token != null) {
         headers['Authorization'] = 'Bearer $token';
       }
-      final response =
-          await _client.get(uri, headers: headers).timeout(AppConfig.requestTimeout);
+      final response = await _client
+          .get(uri, headers: headers)
+          .timeout(AppConfig.requestTimeout);
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return decoded;
@@ -100,7 +101,8 @@ class HttpApiService implements ApiService {
     try {
       final query = <String, String>{};
       if (role != null) query['role'] = role;
-      final data = await _get('/categories', queryParameters: query.isNotEmpty ? query : null) as List;
+      final data = await _get('/categories',
+          queryParameters: query.isNotEmpty ? query : null) as List;
       return data
           .map((json) => CategoryModel.fromJson(json as Map<String, dynamic>))
           .toList();
@@ -145,7 +147,8 @@ class HttpApiService implements ApiService {
   // ── Search ─────────────────────────────────────────────────────────────────
 
   @override
-  Future<List<ProcedureSummaryModel>> searchProcedures(String query, {String? language}) async {
+  Future<List<ProcedureSummaryModel>> searchProcedures(String query,
+      {String? language}) async {
     if (query.trim().length < 2) return [];
 
     try {
@@ -170,11 +173,15 @@ class HttpApiService implements ApiService {
   }
 
   @override
-  Future<List<ProcedureSummaryModel>> getProceduresByCategory(
-    String categoryId,
-  ) async {
+  Future<List<ProcedureSummaryModel>> getProceduresByCategory(String categoryId,
+      {String? language}) async {
     try {
-      final data = await _get('/procedures/by-category/$categoryId');
+      final data = await _get(
+        '/procedures/by-category/$categoryId',
+        queryParameters: {
+          'language': language ?? 'fr',
+        },
+      );
       return (data as List)
           .map(
             (json) =>
@@ -190,7 +197,8 @@ class HttpApiService implements ApiService {
   // ── GenUI with polling ─────────────────────────────────────────────────────
 
   @override
-  Future<ProcedureModel> getProcedureDetail(String slug, {String? role, String? authToken, String? language}) async {
+  Future<ProcedureModel> getProcedureDetail(String slug,
+      {String? role, String? authToken, String? language}) async {
     final message = slug.replaceAll('-', ' ');
     final lang = language ?? LanguageUtils.preferredLanguageFor(message);
 
@@ -339,9 +347,16 @@ class HttpApiService implements ApiService {
   // ── History (authenticated) ────────────────────────────────────────────────
 
   @override
-  Future<List<HistorySummary>> getHistorySummaries(String token) async {
+  Future<List<HistorySummary>> getHistorySummaries(
+    String token, {
+    String? language,
+  }) async {
     try {
-      final data = await _get('/history/me/summaries', token: token);
+      final data = await _get(
+        '/history/me/summaries',
+        token: token,
+        queryParameters: {'language': language ?? 'fr'},
+      );
       final items = (data['items'] as List?) ?? [];
       return items
           .map((json) => HistorySummary.fromJson(json as Map<String, dynamic>))
