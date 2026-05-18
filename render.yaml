@@ -17,14 +17,11 @@ services:
     env: docker
     dockerContext: backend
     dockerfilePath: Dockerfile
-    dockerTarget: production
     
     # Run Uvicorn + Celery concurrently using our startup script
     buildCommand: ""
     startCommand: bash start_render.sh
     
-    # Expose the API port
-    port: 8000
     
     # Attach a persistent disk to save SQLite and ChromaDB data between restarts
     disk:
@@ -34,6 +31,8 @@ services:
     
     # Environment Variables
     envVars:
+      - key: PORT
+        value: "8000"
       - key: APP_ENV
         value: production
       - key: DEBUG
@@ -81,5 +80,3 @@ services:
     env: docker
     dockerContext: frontend
     dockerfilePath: Dockerfile
-    dockerTarget: production
-    port: 80
