@@ -16,7 +16,7 @@ services:
     plan: free # Can be upgraded to 'starter' for fast continuous running
     env: docker
     dockerContext: backend
-    dockerfilePath: Dockerfile
+    dockerfilePath: backend/Dockerfile
     
     # Run Uvicorn + Celery concurrently using our startup script
     dockerCommand: bash start_render.sh
@@ -71,4 +71,4 @@ services:
     plan: free
     env: docker
     dockerContext: frontend
-    dockerfilePath: Dockerfile
+    dockerfilePath: frontend/Dockerfile
