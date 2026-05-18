@@ -1,0 +1,128 @@
+# ============================================================
+# GenUI - Full-Stack Docker Compose
+# Orchestrates: Frontend (Nginx) + Backend (FastAPI) + Redis + Celery
+# ============================================================
+#
+# USAGE:
+#   docker compose up -d --build        # Build & start all services
+#   docker compose logs -f              # Follow all logs
+#   docker compose down                 # Stop everything
+#   docker compose down -v              # Stop + delete volumes (reset data)
+#
+# ============================================================
+
+services:
+  # -- Redis (Cache + Celery Broker/Backend) -----------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: genui_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - genui_network
+
+  # -- FastAPI Backend API -----------------------------------------------------
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: genui_api
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      # Override to use Docker internal service names
+      REDIS_URL: redis://redis:6379/0
+      CHROMA_PERSIST_DIRECTORY: /app/chroma_data
+      # Firebase file is mounted at /app/firebase-service-account.json
+      FIREBASE_SERVICE_ACCOUNT_PATH: /app/firebase-service-account.json
+    volumes:
+      # Persist ChromaDB vectors between restarts
+      - chroma_data:/app/chroma_data
+      # Persist SQLite database between restarts
+      - sqlite_data:/app/data
+      # Persist logs
+      - backend_logs:/app/logs
+      # Mount Firebase service account JSON file (read-only)
+      - ./backend/firebase-service-account.json:/app/firebase-service-account.json:ro
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
+    networks:
+      - genui_network
+
+  # -- Celery Worker (Background AI Tasks) -------------------------------------
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: genui_celery_worker
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      CHROMA_PERSIST_DIRECTORY: /app/chroma_data
+      FIREBASE_SERVICE_ACCOUNT_PATH: /app/firebase-service-account.json
+    volumes:
+      - chroma_data:/app/chroma_data
+      - sqlite_data:/app/data
+      - backend_logs:/app/logs
+      - ./backend/firebase-service-account.json:/app/firebase-service-account.json:ro
+    command: celery -A app.celery_app worker --loglevel=info --pool=solo --concurrency=1
+    networks:
+      - genui_network
+
+  # -- Flutter Web Frontend (Nginx) --------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: production
+    container_name: genui_frontend
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    networks:
+      - genui_network
+
+# -- Volumes -------------------------------------------------------------------
+volumes:
+  chroma_data:
+    driver: local
+  redis_data:
+    driver: local
+  backend_logs:
+    driver: local
+  sqlite_data:
+    driver: local
+
+# -- Networks ------------------------------------------------------------------
+networks:
+  genui_network:
+    driver: bridge

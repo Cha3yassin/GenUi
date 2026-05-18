@@ -1,0 +1,53 @@
+# ============================================================
+# GenUI — Root Gitignore
+# Protects databases, logs, secrets, and environment configurations
+# ============================================================
+
+# -- Secrets & Keys --
+.env
+.env.production
+.env.local
+backend/firebase-service-account.json
+backend/fberaucracy-firebase.json
+frontend/fberaucracy-firebase.json
+
+# -- Databases & Vector Stores --
+*.db
+*.db-journal
+*.sqlite3
+backend/chroma_data/
+backend/data/
+
+# -- Python (Backend) Temp & Cache --
+__pycache__/
+*.py[cod]
+*$py.class
+backend/.venv/
+backend/venv/
+backend/.pytest_cache/
+backend/.coverage
+backend/htmlcov/
+backend/logs/
+
+# -- Flutter / Dart (Frontend) Temp & Cache --
+frontend/.dart_tool/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/.packages
+frontend/build/
+frontend/flutter_export_environment.sh
+
+# -- IDE & System Files --
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+.DS_Store
+Thumbs.db
+
+# -- Agent & AI Sandbox Directories --
+.agents/
+.gemini/

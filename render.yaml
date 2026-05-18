@@ -1,0 +1,85 @@
+# ============================================================
+# Render Blueprint Specification — GenUI Stack
+# Instantly deploys Redis, Backend (API + Celery), and Frontend.
+# ============================================================
+
+services:
+  # -- Redis Database (Cache & Celery Broker) ---------------------------------
+  - type: redis
+    name: redis
+    plan: free
+    ipAllowList: [] # Secure: only accessible within the Render private network
+
+  # -- FastAPI Backend API + Celery Worker (Combined Service) -----------------
+  - type: web
+    name: api
+    plan: free # Can be upgraded to 'starter' for fast continuous running
+    env: docker
+    dockerContext: backend
+    dockerfilePath: Dockerfile
+    dockerTarget: production
+    
+    # Run Uvicorn + Celery concurrently using our startup script
+    buildCommand: ""
+    startCommand: bash start_render.sh
+    
+    # Expose the API port
+    port: 8000
+    
+    # Attach a persistent disk to save SQLite and ChromaDB data between restarts
+    disk:
+      name: api-data
+      mountPath: /app/data
+      sizeGB: 1
+    
+    # Environment Variables
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DEBUG
+        value: "false"
+      
+      # Generates a random secure secret key for JWT session hashing
+      - key: SECRET_KEY
+        generateValue: true
+      
+      # Redis connection string (points to the Redis service above)
+      - key: REDIS_URL
+        value: redis://redis:6379/0
+      
+      # Forces ChromaDB to save its vectors inside the persistent SQLite disk
+      - key: CHROMA_PERSIST_DIRECTORY
+        value: /app/data/chroma_data
+      
+      - key: CHROMA_COLLECTION_NAME
+        value: fberaucracy_procedures
+      
+      - key: FIREBASE_SERVICE_ACCOUNT_PATH
+        value: /etc/secrets/firebase-service-account.json
+      
+      # CORS configuration: Allow frontend to communicate with API
+      - key: ALLOWED_ORIGINS
+        value: "*" # Will be restricted to the frontend URL after deployment
+      
+      # Manual input required on the Render Dashboard:
+      - key: OPENROUTER_API_KEY
+        sync: false
+      
+      - key: OPENROUTER_MODEL
+        value: google/gemini-2.5-flash
+      
+      - key: OPENROUTER_BASE_URL
+        value: https://openrouter.ai/api/v1
+      
+      - key: OPENROUTER_APP_TITLE
+        value: f-idarty
+
+  # -- Flutter Web Frontend (Nginx Server) -----------------------------------
+  - type: web
+    name: frontend
+    plan: free
+    env: docker
+    dockerContext: frontend
+    dockerfilePath: Dockerfile
+    dockerTarget: production
+    port: 80

@@ -1,0 +1,27 @@
+# Build artifacts (will be rebuilt in container)
+build/
+.dart_tool/
+.packages
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Platform-specific (not needed for web build)
+android/.gradle/
+android/app/build/
+ios/Pods/
+ios/.symlinks/
+
+# Test
+test/
+coverage/
+
+# Git
+.git/
+.gitignore
+
+# Misc
+*.md
+*.py

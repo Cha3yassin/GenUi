@@ -1,0 +1,90 @@
+name: GenUI Continuous Integration (CI)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  # -- Backend Test Suite -----------------------------------------------------
+  backend-tests:
+    name: Backend CI (FastAPI)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libpq-dev gcc
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov httpx
+
+      # Creates a dummy service account file to prevent startup crashes during tests
+      - name: Mock Firebase Config for CI
+        run: |
+          echo '{"type": "service_account", "project_id": "mock-id"}' > firebase-service-account.json
+
+      - name: Run Backend Tests
+        run: |
+          pytest --maxfail=2 --disable-warnings
+        env:
+          APP_ENV: testing
+          OPENROUTER_API_KEY: mock-api-key
+          FIREBASE_SERVICE_ACCOUNT_PATH: ./firebase-service-account.json
+          REDIS_URL: redis://localhost:6379/0
+          CHROMA_PERSIST_DIRECTORY: ./test_chroma_data
+
+  # -- Frontend Test Suite ----------------------------------------------------
+  frontend-tests:
+    name: Frontend CI (Flutter Web)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Java (Required for Android build tools if needed)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Verify Flutter Installation
+        run: flutter --version
+
+      - name: Get Flutter Packages
+        run: flutter pub get
+
+      - name: Run Flutter Analyzer (Linter)
+        run: flutter analyze
+
+      - name: Run Flutter Unit & Widget Tests
+        run: flutter test

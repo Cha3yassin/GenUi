@@ -1,0 +1,114 @@
+PROCEDURE: Attestation de Résidence — Sfax, Tunisie
+SOURCE: Délégation de Sfax Ville et Municipalités de la Région de Sfax
+CATEGORY: residence
+LAST_VERIFIED: 2024-01-15
+REGION: Sfax
+
+---
+
+DESCRIPTION GÉNÉRALE:
+L'attestation de résidence (ou certificat de résidence) est un document officiel délivré par la Délégation ou la Municipalité qui certifie qu'une personne réside effectivement dans une adresse donnée en Tunisie. Ce document est requis pour de nombreuses démarches: ouverture de compte bancaire, inscriptions scolaires, demandes de subventions, etc.
+
+---
+
+TYPES D'ATTESTATION DE RÉSIDENCE:
+1. Attestation de résidence simple (pour usage local)
+2. Attestation de résidence légalisée (pour usage officiel ou à l'étranger)
+3. Attestation de résidence pour étudiants (accès à la bourse CNSS/CNRPS)
+
+---
+
+DOCUMENTS REQUIS:
+1. Carte d'Identité Nationale (CIN) valide — originale + photocopie
+2. L'un des justificatifs de domicile suivants:
+   - Contrat de bail enregistré (locataires) — ou attestation du propriétaire légalisée
+   - Titre de propriété ou acte notarié (propriétaires)
+   - Facture STEG ou SONEDE récente (moins de 3 mois) au nom du demandeur
+   - Livret de famille (pour les membres du foyer)
+3. Formulaire de demande (fourni sur place gratuitement)
+4. Une photo d'identité récente (format 4x4 cm)
+
+POUR LES LOCATAIRES SANS CONTRAT:
+- Attestation du propriétaire légalisée à la municipalité
+- CIN du propriétaire (photocopie)
+
+POUR LES RÉSIDENTS CHEZ UN TIERS:
+- Lettre d'hébergement du chef de famille légalisée
+- CIN du chef de famille hébergeant
+
+---
+
+ÉTAPES DE LA PROCÉDURE:
+
+Étape 1 — Se présenter à la Délégation compétente
+La Délégation compétente est celle du secteur de votre adresse de résidence.
+Délégations de la région de Sfax:
+• Délégation Sfax Ville: Avenue Hedi Chaker, Sfax — Tél: +216 74 228 700
+• Délégation Sfax Ouest: Route de Tunis — Tél: +216 74 290 100
+• Délégation Sakiet Eddaier: Rue Principale Sakiet — Tél: +216 74 480 200
+• Délégation Thyna: Route de Gabès — Tél: +216 74 270 300
+
+Horaires généraux: Lundi-Vendredi 8h00-15h30 (sans interruption)
+Samedi: 8h00-12h00 (pour les urgences uniquement)
+
+Étape 2 — Déposer le formulaire et les documents
+Remettre le dossier complet au guichet "Attestations Administratives"
+Un agent vérifie les documents sur place
+En cas d'incomplétude, un formulaire de pièces manquantes est remis
+
+Étape 3 — Vérification de résidence (si nécessaire)
+Pour les nouvelles demandes ou en cas de doute, un agent peut être envoyé vérifier la résidence
+Délai de vérification: 2 à 3 jours ouvrables
+
+Étape 4 — Payer les frais de timbre
+Timbre fiscal: 0.600 TND pour l'attestation simple
+Légalisation: 1.000 TND supplémentaires si légalisée
+
+Étape 5 — Retrait de l'attestation
+Délivrance immédiate si dossier complet et résidence non contestée
+Sinon: délai de 3 à 7 jours ouvrables
+
+---
+
+DÉLAIS:
+Attestation simple avec dossier complet: Immédiat (même jour)
+Avec vérification terrain: 3 à 7 jours ouvrables
+
+---
+
+VALIDITÉ DU DOCUMENT:
+L'attestation de résidence est valable 3 mois à compter de la date de délivrance.
+Pour les établissements bancaires: certains exigent une attestation de moins de 1 mois.
+
+---
+
+COÛTS:
+Timbre fiscal (attestation simple): 0.600 TND
+Timbre fiscal (attestation légalisée): 1.600 TND
+Frais de déplacement agent (vérification terrain): Gratuit
+Total: 0.600 à 1.600 TND
+
+---
+
+BUREAU RESPONSABLE:
+Nom: Délégation de Sfax Ville
+Adresse: Avenue Hedi Chaker, Sfax 3000, Tunisie
+Téléphone: +216 74 228 700
+Fax: +216 74 228 701
+Horaires: Lundi-Vendredi 8h00-15h30
+
+---
+
+AVERTISSEMENTS ET NOTES:
+- L'attestation de résidence n'est pas une preuve de domicile définitive — elle est nominative et datée
+- Les étrangers résidant en Tunisie doivent fournir leur carte de séjour (permis de résidence) en plus de la CIN étrangère
+- En cas de déménagement récent, prévoir un délai de mise à jour des fichiers de la délégation (parfois 15 jours)
+- La domiciliation fiscale (pour entreprises) est distincte et relève du bureau de contrôle des impôts
+- Les Tunisiens résidant à l'étranger peuvent obtenir une attestation de résidence à l'étranger via leur consulat
+
+---
+
+TAXES ET IMPÔTS LIÉS AU DOMICILE:
+Taxe sur les immeubles bâtis (TIB): payable annuellement à la municipalité
+Montant TIB: calculé selon la valeur locative de l'immeuble (généralement entre 30 et 200 TND/an)
+Taxe de collecte des ordures ménagères: incluse dans la facture SONEDE (généralement 6 TND/trimestre)
