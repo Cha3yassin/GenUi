@@ -34,9 +34,12 @@ services:
       - key: SECRET_KEY
         generateValue: true
       
-      # Redis connection string (points to the Redis service above)
+      # Redis connection string (dynamically injected from the Redis service above)
       - key: REDIS_URL
-        value: redis://redis:6379/0
+        fromService:
+          name: redis
+          type: redis
+          property: connectionString
       
       # Forces ChromaDB to save its vectors inside the persistent SQLite disk
       - key: CHROMA_PERSIST_DIRECTORY
