@@ -76,10 +76,10 @@ services:
     dockerContext: frontend
     dockerfilePath: frontend/Dockerfile
     envVars:
-      - key: BACKEND_URL
+      - key: BACKEND_HOST
         fromService:
           name: api
           type: web
-          property: url
+          property: host
       - key: NGINX_ENVSUBST_FILTER
-        value: "BACKEND_URL"
+        value: "BACKEND_HOST"
