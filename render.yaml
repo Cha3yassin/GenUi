@@ -62,7 +62,7 @@ services:
       
       # Manual input required on the Render Dashboard:
       - key: OPENROUTER_API_KEY
-        sync: false
+        value: sk-or-v1-placeholder-paste-in-render-dashboard
       
       - key: OPENROUTER_MODEL
         value: google/gemini-2.5-flash
