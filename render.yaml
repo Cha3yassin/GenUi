@@ -75,3 +75,11 @@ services:
     env: docker
     dockerContext: frontend
     dockerfilePath: frontend/Dockerfile
+    envVars:
+      - key: BACKEND_HOSTPORT
+        fromService:
+          name: api
+          type: web
+          property: hostport
+      - key: NGINX_ENVSUBST_FILTER
+        value: "$BACKEND_HOSTPORT"

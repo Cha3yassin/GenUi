@@ -25,11 +25,8 @@ RUN flutter build web --release --base-href / --dart-define=DOCKER=true
 # ── Stage 2: Nginx Production Server ────────────────────────────────────────
 FROM nginx:1.27-alpine AS production
 
-# Remove default Nginx config
-RUN rm /etc/nginx/conf.d/default.conf
-
-# Copy custom Nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy custom Nginx config as a template for dynamic environment variables
+COPY nginx.conf /etc/nginx/templates/default.conf.template
 
 # Copy built Flutter web app from builder stage
 COPY --from=builder /app/build/web /usr/share/nginx/html
