@@ -82,4 +82,4 @@ services:
           type: web
           property: hostport
       - key: NGINX_ENVSUBST_FILTER
-        value: "$BACKEND_HOSTPORT"
+        value: "BACKEND_HOSTPORT"
